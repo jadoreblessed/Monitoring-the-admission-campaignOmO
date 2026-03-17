@@ -1,77 +1,263 @@
-Мониторинг приёмной кампании университета
+# 🎓 Мониторинг приёмной кампании
 
-📌 О проекте
+Дашборд для отслеживания заявок, зачислений и конверсии приёмной кампании университета.
 
-Веб-приложение для отслеживания хода приёмной кампании в реальном времени. Помогает приёмной комиссии быстро замечать проблемы с набором и увеличивать процент зачисленных абитуриентов.
+---
 
-Простыми словами: Дашборд, где видно, сколько заявок подано, сколько студентов зачислено, откуда они пришли и как всё меняется по дням.
+## 👥 Команда и роли
 
-🎯 Что решает
+| Участник | Роль | Зона ответственности |
+|----------|------|----------------------|
+| jadoreblessed | Team Lead | Архитектура, ревью PR, координация |
+| — | Backend Dev | FastAPI, PostgreSQL, REST API |
+| — | Backend Dev | Генерация данных, валидации, экспорт CSV |
+| — | Frontend Dev | Дашборд, фильтры, графики |
+| — | Frontend Dev | Карточка заявки, таблицы, UI-компоненты |
 
-Проблема	Как решаем
-Не видно, где провалы в наборе	Графики и метрики в реальном времени
-Долго считаем конверсию	Автоматический расчёт по любым срезам
-Нет единой картины по источникам	Аналитика по сайту, олимпиадам, агрегаторам
-Факультеты не видят свои программы	Ролевой доступ с ограничениями
-Долгие отчёты для руководства	Экспорт в CSV в один клик
-Ключевая метрика: Время отклика дашборда ≤ 2 секунды
+---
 
-👥 Кто будет пользоваться
+## 🏗️ Архитектура проекта
 
-Приёмная комиссия	Все данные полностью	Менять статусы, загружать данные, экспорт
-Факультет	Только свои программы	Смотреть статистику, экспорт
-Аналитик	Все данные	Только просмотр и экспорт
-📊 Что показывает дашборд
-Главный экран:
+```
+┌─────────────────────────────────────────────────────┐
+│                    FRONTEND                         │
+│          React + TypeScript + Recharts              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
+│  │Dashboard │  │ Таблица  │  │ Карточка заявки  │  │
+│  │(графики) │  │ заявок   │  │ + лог статусов   │  │
+│  └────┬─────┘  └────┬─────┘  └────────┬─────────┘  │
+└───────┼─────────────┼─────────────────┼─────────────┘
+        │   REST API (JSON)              │
+┌───────┼─────────────┼─────────────────┼─────────────┐
+│       ▼             ▼                 ▼             │
+│                  BACKEND                            │
+│              FastAPI (Python)                       │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
+│  │/dashboard│  │/applic.. │  │  /export/report  │  │
+│  │ метрики  │  │  CRUD    │  │     CSV          │  │
+│  └────┬─────┘  └────┬─────┘  └────────┬─────────┘  │
+└───────┼─────────────┼─────────────────┼─────────────┘
+        │   SQLAlchemy ORM               │
+┌───────▼─────────────▼─────────────────▼─────────────┐
+│                  PostgreSQL                         │
+│  applicants │ applications │ programs │ status_logs │
+└─────────────────────────────────────────────────────┘
+```
 
-KPI-карточки: Заявки, Зачислено, Конверсия, Среднее время
+---
 
-График динамики: Как менялось количество заявок по дням
+## 📁 Структура репозитория
 
-Круговая диаграмма: Распределение по источникам (сайт/олимп/агрегаторы)
+```
+Monitoring-the-admission-campaignOmO/
+│
+├── backend/                        # FastAPI приложение
+│   ├── app/
+│   │   ├── routers/               # Эндпоинты API
+│   │   │   ├── applicants.py      # CRUD абитуриентов
+│   │   │   ├── applications.py    # CRUD заявок + смена статуса
+│   │   │   ├── programs.py        # CRUD программ
+│   │   │   ├── dashboard.py       # Метрики и аналитика
+│   │   │   ├── export.py          # Экспорт CSV
+│   │   │   └── seed.py            # Генерация тестовых данных
+│   │   ├── models.py              # SQLAlchemy модели (таблицы БД)
+│   │   ├── schemas.py             # Pydantic схемы + валидации
+│   │   └── database.py            # Подключение к PostgreSQL
+│   ├── main.py                    # Точка входа
+│   ├── requirements.txt           # Зависимости Python
+│   └── .env.example               # Пример переменных окружения
+│
+├── frontend/                       # React приложение
+│   ├── src/
+│   │   ├── components/            # UI-компоненты
+│   │   │   ├── Dashboard/         # Дашборд с графиками
+│   │   │   ├── ApplicationCard/   # Карточка заявки
+│   │   │   ├── ApplicationTable/  # Таблица заявок
+│   │   │   └── Filters/           # Панель фильтров
+│   │   ├── pages/                 # Страницы приложения
+│   │   ├── api/                   # Запросы к бэкенду (fetch/axios)
+│   │   ├── types/                 # TypeScript типы
+│   │   └── App.tsx
+│   ├── package.json
+│   └── .env.example
+│
+├── docs/                           # Документация
+│   ├── api-contract.md            # JSON-контракт эндпоинтов
+│   ├── db-schema.md               # Схема базы данных (ERD)
+│   └── demo-scenario.md           # Демо-сценарий для защиты
+│
+├── data/                           # Синтетические датасеты
+│   ├── T1/                        # Тестовый набор (≥100 заявок)
+│   │   ├── applicants.csv
+│   │   ├── applications.csv
+│   │   └── programs.csv
+│   └── T2/                        # Расширенный набор
+│
+└── README.md                       # Этот файл
+```
 
-Таблица конверсии: По каждой программе
+---
 
-Список последних заявок: Кликабельный, открывает детали
+## 🗄️ Схема базы данных
 
-Фильтры:
+```
+applicants                    programs
+──────────────────            ──────────────────────
+id          INT PK            program_code  VARCHAR PK
+fio         VARCHAR           program_name  VARCHAR
+birth_year  INT               faculty       VARCHAR
+region      VARCHAR
 
-По периоду (дата-дата)
+applications
+──────────────────────────────────────────
+id                INT PK
+applicant_id      INT FK → applicants.id
+program_code      VARCHAR FK → programs.program_code
+wave              INT          (1, 2, 3 — волна зачисления)
+source            VARCHAR      (site | olymp | aggregator | other)
+status            VARCHAR      (new | review | enrolled | rejected)
+created_at        TIMESTAMP
+status_changed_at TIMESTAMP
 
-По программе подготовки
+status_logs                   (трассируемость — лог всех смен статуса)
+──────────────────────────────
+id              INT PK
+application_id  INT FK
+old_status      VARCHAR
+new_status      VARCHAR
+changed_at      TIMESTAMP
+changed_by      VARCHAR
+```
 
-По источнику трафика
+---
 
-По волне зачисления
+## 📊 Метрики дашборда
 
-📁 Откуда берутся данные
-Три таблицы:
+| Метрика | Формула |
+|---------|---------|
+| `applications` | `COUNT(applications)` |
+| `enrolled` | `COUNT(applications WHERE status = 'enrolled')` |
+| `conversion` | `enrolled / applications` |
 
-Абитуриенты — ФИО, год рождения, регион
+**Срезы:** по программе · по факультету · по источнику · по волне · по периоду
 
-Программы — код, название, факультет
+---
 
-Заявки — кто, на какую программу, когда, статус, источник
+## 🔌 API эндпоинты
 
-Статусы заявок:
+| Метод | URL | Описание |
+|-------|-----|----------|
+| `GET` | `/dashboard/` | Все метрики с фильтрами |
+| `GET` | `/applications/` | Список заявок |
+| `GET` | `/applications/{id}` | Карточка заявки |
+| `POST` | `/applications/` | Создать заявку |
+| `PATCH` | `/applications/{id}/status` | Сменить статус |
+| `GET` | `/applications/{id}/logs` | Лог статусов |
+| `GET` | `/export/report` | Скачать CSV-отчёт |
+| `GET` | `/programs/` | Список программ |
+| `POST` | `/seed/generate` | Сгенерировать тестовые данные |
 
-new — новая
+**Фильтры для `/dashboard/` и `/export/report`:**
+```
+?date_from=2024-03-01&date_to=2024-08-31&program_code=CS-01&source=site&wave=1
+```
 
-review — на рассмотрении
+---
 
-enrolled — зачислен
+## 🚀 Быстрый старт
 
-rejected — отказано
+### Шаг 1 — Клонировать репозиторий
 
-Источники трафика:
+```bash
+git clone https://gitverse.ru/jadoreblessed/Monitoring-the-admission-campaignOmO.git
+cd Monitoring-the-admission-campaignOmO
+```
 
-site — сайт университета
+### Шаг 2 — Создать базу данных
 
-olymp — олимпиады
+Открыть **pgAdmin** (или psql) и выполнить:
+```sql
+CREATE DATABASE admission_db;
+```
 
-aggregator — агрегаторы (Поступи.онлайн)
+### Шаг 3 — Запустить бэкенд
 
-other — другое
+```bash
+cd backend
+pip install -r requirements.txt
+cp .env.example .env        # заполнить DATABASE_URL
+uvicorn main:app --reload
+```
 
-Важно: Один абитуриент может подать до 5 заявок. Если зачислен на одну — остальные автоматически снимаются.
+Swagger UI: **http://localhost:8000/docs**
 
+### Шаг 4 — Запустить фронтенд
+
+```bash
+cd frontend
+npm install
+cp .env.example .env        # VITE_API_URL=http://localhost:8000
+npm run dev
+```
+
+Приложение: **http://localhost:5173**
+
+### Шаг 5 — Сгенерировать тестовые данные
+
+```bash
+curl -X POST http://localhost:8000/seed/generate
+```
+
+или открыть в браузере **http://localhost:8000/docs** → `POST /seed/generate` → Try it out → Execute
+
+---
+
+## 🌿 Ветки и процесс работы
+
+```
+main          — стабильная версия (только через PR)
+dev           — общая ветка разработки
+feature/...   — новая функциональность
+fix/...       — исправление багов
+```
+
+**Правила:**
+1. Никто не пушит напрямую в `main`
+2. Каждая задача — отдельная ветка от `dev`
+3. Перед мержем — Pull Request + ревью от Team Lead
+4. Названия веток: `feature/dashboard-filters`, `fix/csv-export-encoding`
+
+**Пример:**
+```bash
+git checkout dev
+git pull
+git checkout -b feature/dashboard-filters
+# ... работаешь ...
+git push origin feature/dashboard-filters
+# создаёшь Pull Request в dev
+```
+
+---
+
+## ✅ Критерии приёмки (из задания)
+
+- [ ] ≥ 3 метрики на дашборде (applications, enrolled, conversion)
+- [ ] Фильтры: период / направление / источник / волна
+- [ ] Экспорт CSV с указанием применённых фильтров
+- [ ] Воспроизводимый демо-сценарий
+- [ ] Тестовый датасет T1 ≥ 100 заявок
+- [ ] ≥ 5 валидаций данных
+- [ ] Лог смены статусов (трассируемость)
+
+---
+
+## 🛠️ Стек технологий
+
+| Слой | Технология |
+|------|-----------|
+| Backend | Python 3.12, FastAPI, SQLAlchemy |
+| Database | PostgreSQL 16 |
+| Validation | Pydantic v2 |
+| Frontend | React, TypeScript |
+| Charts | Recharts |
+| VCS | Git, GitVerse |
