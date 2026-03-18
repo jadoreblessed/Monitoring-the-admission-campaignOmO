@@ -141,74 +141,7 @@ changed_by      VARCHAR
 
 **Срезы:** по программе · по факультету · по источнику · по волне · по периоду
 
----
 
-## 🔌 API эндпоинты
-
-| Метод | URL | Описание |
-|-------|-----|----------|
-| `GET` | `/dashboard/` | Все метрики с фильтрами |
-| `GET` | `/applications/` | Список заявок |
-| `GET` | `/applications/{id}` | Карточка заявки |
-| `POST` | `/applications/` | Создать заявку |
-| `PATCH` | `/applications/{id}/status` | Сменить статус |
-| `GET` | `/applications/{id}/logs` | Лог статусов |
-| `GET` | `/export/report` | Скачать CSV-отчёт |
-| `GET` | `/programs/` | Список программ |
-| `POST` | `/seed/generate` | Сгенерировать тестовые данные |
-
-**Фильтры для `/dashboard/` и `/export/report`:**
-```
-?date_from=2024-03-01&date_to=2024-08-31&program_code=CS-01&source=site&wave=1
-```
-
----
-
-## 🚀 Быстрый старт
-
-### Шаг 1 — Клонировать репозиторий
-
-```bash
-git clone https://gitverse.ru/jadoreblessed/Monitoring-the-admission-campaignOmO.git
-cd Monitoring-the-admission-campaignOmO
-```
-
-### Шаг 2 — Создать базу данных
-
-Открыть **pgAdmin** (или psql) и выполнить:
-```sql
-CREATE DATABASE admission_db;
-```
-
-### Шаг 3 — Запустить бэкенд
-
-```bash
-cd backend
-pip install -r requirements.txt
-cp .env.example .env        # заполнить DATABASE_URL
-uvicorn main:app --reload
-```
-
-Swagger UI: **http://localhost:8000/docs**
-
-### Шаг 4 — Запустить фронтенд
-
-```bash
-cd frontend
-npm install
-cp .env.example .env        # VITE_API_URL=http://localhost:8000
-npm run dev
-```
-
-Приложение: **http://localhost:5173**
-
-### Шаг 5 — Сгенерировать тестовые данные
-
-```bash
-curl -X POST http://localhost:8000/seed/generate
-```
-
-или открыть в браузере **http://localhost:8000/docs** → `POST /seed/generate` → Try it out → Execute
 
 ---
 
@@ -227,29 +160,8 @@ fix/...       — исправление багов
 3. Перед мержем — Pull Request + ревью от Team Lead
 4. Названия веток: `feature/dashboard-filters`, `fix/csv-export-encoding`
 
-**Пример:**
-```bash
-git checkout dev
-git pull
-git checkout -b feature/dashboard-filters
-# ... работаешь ...
-git push origin feature/dashboard-filters
-# создаёшь Pull Request в dev
-```
-
 ---
 
-## ✅ Критерии приёмки (из задания)
-
-- [ ] ≥ 3 метрики на дашборде (applications, enrolled, conversion)
-- [ ] Фильтры: период / направление / источник / волна
-- [ ] Экспорт CSV с указанием применённых фильтров
-- [ ] Воспроизводимый демо-сценарий
-- [ ] Тестовый датасет T1 ≥ 100 заявок
-- [ ] ≥ 5 валидаций данных
-- [ ] Лог смены статусов (трассируемость)
-
----
 
 ## 🛠️ Стек технологий
 
