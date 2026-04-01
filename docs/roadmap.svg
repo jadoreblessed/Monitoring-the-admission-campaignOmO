@@ -1,0 +1,68 @@
+<svg width="900" height="440" xmlns="http://www.w3.org/2000/svg" style="font-family:Arial,sans-serif;background:white">
+<text x="450" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">Roadmap проекта (15 недель)</text>
+<g transform="translate(130,45)">
+<line x1="0" y1="0" x2="0" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="50" y1="0" x2="50" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="100" y1="0" x2="100" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="150" y1="0" x2="150" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="200" y1="0" x2="200" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="250" y1="0" x2="250" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="300" y1="0" x2="300" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="350" y1="0" x2="350" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="400" y1="0" x2="400" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="450" y1="0" x2="450" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="500" y1="0" x2="500" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="550" y1="0" x2="550" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="600" y1="0" x2="600" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="650" y1="0" x2="650" y2="340" stroke="#eee" stroke-width="0.5"/>
+<line x1="700" y1="0" x2="700" y2="340" stroke="#eee" stroke-width="0.5"/>
+<text x="25" y="-6" text-anchor="middle" font-size="9" fill="#888">1</text>
+<text x="75" y="-6" text-anchor="middle" font-size="9" fill="#888">2</text>
+<text x="125" y="-6" text-anchor="middle" font-size="9" fill="#888">3</text>
+<text x="175" y="-6" text-anchor="middle" font-size="9" fill="#888">4</text>
+<text x="225" y="-6" text-anchor="middle" font-size="9" fill="#888">5</text>
+<text x="275" y="-6" text-anchor="middle" font-size="9" fill="#888">6</text>
+<text x="325" y="-6" text-anchor="middle" font-size="9" fill="#888">7</text>
+<text x="375" y="-6" text-anchor="middle" font-size="9" fill="#888">8</text>
+<text x="425" y="-6" text-anchor="middle" font-size="9" fill="#888">9</text>
+<text x="475" y="-6" text-anchor="middle" font-size="9" fill="#888">10</text>
+<text x="525" y="-6" text-anchor="middle" font-size="9" fill="#888">11</text>
+<text x="575" y="-6" text-anchor="middle" font-size="9" fill="#888">12</text>
+<text x="625" y="-6" text-anchor="middle" font-size="9" fill="#888">13</text>
+<text x="675" y="-6" text-anchor="middle" font-size="9" fill="#888">14</text>
+<text x="710" y="-6" text-anchor="middle" font-size="9" fill="#888">15</text>
+<rect x="0" y="10" width="200" height="28" rx="4" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+<text x="100" y="29" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">Документация</text>
+<rect x="100" y="48" width="200" height="28" rx="4" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+<text x="200" y="67" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">Event Storming / DDD</text>
+<rect x="200" y="86" width="200" height="28" rx="4" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="0.5"/>
+<text x="300" y="105" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">BPMN-схемы, ТЗ</text>
+<rect x="200" y="124" width="200" height="28" rx="4" fill="#E1F5EE" stroke="#5DCAA5" stroke-width="0.5"/>
+<text x="300" y="143" text-anchor="middle" font-size="10" font-weight="bold" fill="#085041">Модель данных (ERD, 3НФ)</text>
+<rect x="250" y="162" width="200" height="28" rx="4" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+<text x="350" y="181" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">Backend MVP</text>
+<rect x="350" y="200" width="150" height="28" rx="4" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+<text x="425" y="219" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">Frontend MVP</text>
+<rect x="450" y="238" width="100" height="28" rx="4" fill="#FAEEDA" stroke="#FAC775" stroke-width="0.5"/>
+<text x="500" y="257" text-anchor="middle" font-size="10" font-weight="bold" fill="#633806">Интеграция</text>
+<rect x="500" y="276" width="150" height="28" rx="4" fill="#FAEEDA" stroke="#FAC775" stroke-width="0.5"/>
+<text x="575" y="295" text-anchor="middle" font-size="10" font-weight="bold" fill="#633806">Доработка v2</text>
+<rect x="650" y="314" width="100" height="28" rx="4" fill="#FAECE7" stroke="#F0997B" stroke-width="0.5"/>
+<text x="700" y="333" text-anchor="middle" font-size="10" font-weight="bold" fill="#712B13">Защита</text>
+</g>
+<text x="25" y="74" text-anchor="end" font-size="9" fill="#888">Проектирование</text>
+<text x="25" y="190" text-anchor="end" font-size="9" fill="#888">Модель</text>
+<text x="25" y="228" text-anchor="end" font-size="9" fill="#888">Разработка</text>
+<text x="25" y="320" text-anchor="end" font-size="9" fill="#888">Доработка</text>
+<text x="25" y="358" text-anchor="end" font-size="9" fill="#888">Защита</text>
+<rect x="50" y="410" width="14" height="14" rx="3" fill="#EEEDFE" stroke="#AFA9EC"/>
+<text x="70" y="422" font-size="10" fill="#666">Проектирование</text>
+<rect x="180" y="410" width="14" height="14" rx="3" fill="#E1F5EE" stroke="#5DCAA5"/>
+<text x="200" y="422" font-size="10" fill="#666">Модель данных</text>
+<rect x="310" y="410" width="14" height="14" rx="3" fill="#E6F1FB" stroke="#85B7EB"/>
+<text x="330" y="422" font-size="10" fill="#666">Разработка MVP</text>
+<rect x="460" y="410" width="14" height="14" rx="3" fill="#FAEEDA" stroke="#FAC775"/>
+<text x="480" y="422" font-size="10" fill="#666">Доработка</text>
+<rect x="570" y="410" width="14" height="14" rx="3" fill="#FAECE7" stroke="#F0997B"/>
+<text x="590" y="422" font-size="10" fill="#666">Защита</text>
+</svg>

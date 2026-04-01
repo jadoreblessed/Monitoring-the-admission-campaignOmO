@@ -1,0 +1,56 @@
+<svg width="900" height="620" xmlns="http://www.w3.org/2000/svg" style="font-family:Arial,sans-serif;background:white">
+<text x="450" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">User Story Map — Мониторинг приёмной кампании РТУ МИРЭА</text>
+<rect x="50" y="45" width="250" height="36" rx="6" fill="#EEEDFE" stroke="#AFA9EC"/>
+<text x="175" y="68" text-anchor="middle" font-size="13" font-weight="bold" fill="#3C3489">Управление заявками</text>
+<rect x="325" y="45" width="250" height="36" rx="6" fill="#E1F5EE" stroke="#5DCAA5"/>
+<text x="450" y="68" text-anchor="middle" font-size="13" font-weight="bold" fill="#085041">Аналитика и отчётность</text>
+<rect x="600" y="45" width="250" height="36" rx="6" fill="#FAEEDA" stroke="#FAC775"/>
+<text x="725" y="68" text-anchor="middle" font-size="13" font-weight="bold" fill="#633806">Контроль KPI</text>
+<line x1="50" y1="95" x2="850" y2="95" stroke="#ccc" stroke-dasharray="4 3"/>
+<rect x="10" y="100" width="28" height="150" rx="4" fill="#97C459"/>
+<text x="24" y="180" text-anchor="middle" font-size="11" font-weight="bold" fill="#173404" transform="rotate(-90,24,180)">Must</text>
+<rect x="50" y="105" width="250" height="34" rx="4" fill="#EAF3DE" stroke="#97C459" stroke-width="0.5"/>
+<text x="60" y="126" font-size="10" fill="#27500A">Создать заявку (ФИО, email, программа)</text>
+<rect x="50" y="145" width="250" height="34" rx="4" fill="#EAF3DE" stroke="#97C459" stroke-width="0.5"/>
+<text x="60" y="166" font-size="10" fill="#27500A">Менять статус (new→review→enrolled)</text>
+<rect x="50" y="185" width="250" height="34" rx="4" fill="#EAF3DE" stroke="#97C459" stroke-width="0.5"/>
+<text x="60" y="206" font-size="10" fill="#27500A">Список заявок с фильтром по статусу</text>
+<rect x="325" y="105" width="250" height="34" rx="4" fill="#EAF3DE" stroke="#97C459" stroke-width="0.5"/>
+<text x="335" y="126" font-size="10" fill="#27500A">Конверсия по программам на дашборде</text>
+<rect x="325" y="145" width="250" height="34" rx="4" fill="#EAF3DE" stroke="#97C459" stroke-width="0.5"/>
+<text x="335" y="166" font-size="10" fill="#27500A">Экспорт данных в CSV одной кнопкой</text>
+<rect x="325" y="185" width="250" height="34" rx="4" fill="#EAF3DE" stroke="#97C459" stroke-width="0.5"/>
+<text x="335" y="206" font-size="10" fill="#27500A">3 метрики: заявки, зачислено, конверсия</text>
+<rect x="600" y="105" width="250" height="34" rx="4" fill="#EAF3DE" stroke="#97C459" stroke-width="0.5"/>
+<text x="610" y="126" font-size="10" fill="#27500A">Общая конверсия и количество заявок</text>
+<line x1="50" y1="265" x2="850" y2="265" stroke="#ccc" stroke-dasharray="4 3"/>
+<rect x="10" y="275" width="28" height="110" rx="4" fill="#85B7EB"/>
+<text x="24" y="335" text-anchor="middle" font-size="11" font-weight="bold" fill="#042C53" transform="rotate(-90,24,335)">Should</text>
+<rect x="50" y="280" width="250" height="34" rx="4" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+<text x="60" y="301" font-size="10" fill="#0C447C">История смен статуса каждой заявки</text>
+<rect x="325" y="280" width="250" height="34" rx="4" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+<text x="335" y="301" font-size="10" fill="#0C447C">Графики конверсии (столбцы, круговая)</text>
+<rect x="325" y="320" width="250" height="34" rx="4" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+<text x="335" y="341" font-size="10" fill="#0C447C">Фильтры по волне и источнику</text>
+<rect x="600" y="280" width="250" height="34" rx="4" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+<text x="610" y="301" font-size="10" fill="#0C447C">Статистика по источникам заявок</text>
+<line x1="50" y1="400" x2="850" y2="400" stroke="#ccc" stroke-dasharray="4 3"/>
+<rect x="10" y="410" width="28" height="70" rx="4" fill="#FAC775"/>
+<text x="24" y="448" text-anchor="middle" font-size="11" font-weight="bold" fill="#412402" transform="rotate(-90,24,448)">Could</text>
+<rect x="50" y="415" width="250" height="34" rx="4" fill="#FAEEDA" stroke="#FAC775" stroke-width="0.5"/>
+<text x="60" y="436" font-size="10" fill="#633806">Карточка заявки (модальное окно)</text>
+<rect x="325" y="415" width="250" height="34" rx="4" fill="#FAEEDA" stroke="#FAC775" stroke-width="0.5"/>
+<text x="335" y="436" font-size="10" fill="#633806">Сравнение конверсии между волнами</text>
+<rect x="600" y="415" width="250" height="34" rx="4" fill="#FAEEDA" stroke="#FAC775" stroke-width="0.5"/>
+<text x="610" y="436" font-size="10" fill="#633806">Фильтр по дате в экспорте</text>
+<line x1="50" y1="495" x2="850" y2="495" stroke="#ccc" stroke-dasharray="4 3"/>
+<rect x="10" y="505" width="28" height="70" rx="4" fill="#D3D1C7"/>
+<text x="24" y="543" text-anchor="middle" font-size="11" font-weight="bold" fill="#2C2C2A" transform="rotate(-90,24,543)">Won't</text>
+<rect x="50" y="510" width="250" height="34" rx="4" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+<text x="60" y="531" font-size="10" fill="#444441">Личный кабинет абитуриента</text>
+<rect x="325" y="510" width="250" height="34" rx="4" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+<text x="335" y="531" font-size="10" fill="#444441">Интеграция с ФИС ГИА</text>
+<rect x="600" y="510" width="250" height="34" rx="4" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+<text x="610" y="531" font-size="10" fill="#444441">Push-уведомления</text>
+<text x="450" y="600" text-anchor="middle" font-size="10" fill="#888">Проект: Мониторинг приёмной кампании | Team Lead: Зырянов Владислав</text>
+</svg>

@@ -1,0 +1,90 @@
+<svg width="900" height="560" xmlns="http://www.w3.org/2000/svg" style="font-family:Arial,sans-serif;background:white">
+<text x="450" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">RACI-матрица — Мониторинг приёмной кампании</text>
+<line x1="40" y1="75" x2="860" y2="75" stroke="#333" stroke-width="1.5"/>
+<text x="170" y="55" text-anchor="middle" font-size="10" font-weight="bold" fill="#555">Задача</text>
+<text x="370" y="48" text-anchor="middle" font-size="9" font-weight="bold" fill="#555">Зырянов В.</text>
+<text x="370" y="62" text-anchor="middle" font-size="8" fill="#888">Team Lead</text>
+<text x="470" y="48" text-anchor="middle" font-size="9" font-weight="bold" fill="#555">Груздев В.</text>
+<text x="470" y="62" text-anchor="middle" font-size="8" fill="#888">Backend #1</text>
+<text x="570" y="48" text-anchor="middle" font-size="9" font-weight="bold" fill="#555">Коба Т.</text>
+<text x="570" y="62" text-anchor="middle" font-size="8" fill="#888">Backend #2</text>
+<text x="670" y="48" text-anchor="middle" font-size="9" font-weight="bold" fill="#555">Комаров Н.</text>
+<text x="670" y="62" text-anchor="middle" font-size="8" fill="#888">Frontend #1</text>
+<text x="770" y="48" text-anchor="middle" font-size="9" font-weight="bold" fill="#555">Саженин М.</text>
+<text x="770" y="62" text-anchor="middle" font-size="8" fill="#888">Frontend #2</text>
+<rect x="40" y="80" width="820" height="30" fill="#fafafa"/>
+<text x="50" y="100" font-size="10" fill="#333">Архитектура проекта</text>
+<rect x="355" y="86" width="28" height="18" rx="3" fill="#EEEDFE"/><text x="369" y="99" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">R</text>
+<rect x="455" y="86" width="28" height="18" rx="3" fill="#E6F1FB"/><text x="469" y="99" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">C</text>
+<rect x="555" y="86" width="28" height="18" rx="3" fill="#E6F1FB"/><text x="569" y="99" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">C</text>
+<rect x="655" y="86" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="669" y="99" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="755" y="86" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="769" y="99" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="40" y="112" width="820" height="30" fill="white"/>
+<text x="50" y="132" font-size="10" fill="#333">Документация (ERD, BPMN)</text>
+<rect x="355" y="118" width="28" height="18" rx="3" fill="#EEEDFE"/><text x="369" y="131" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">R</text>
+<rect x="455" y="118" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="469" y="131" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="555" y="118" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="569" y="131" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="655" y="118" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="669" y="131" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="755" y="118" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="769" y="131" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="40" y="144" width="820" height="30" fill="#fafafa"/>
+<text x="50" y="164" font-size="10" fill="#333">Модели БД (models.py)</text>
+<rect x="355" y="150" width="28" height="18" rx="3" fill="#FCEBEB"/><text x="369" y="163" text-anchor="middle" font-size="10" font-weight="bold" fill="#791F1F">A</text>
+<rect x="455" y="150" width="28" height="18" rx="3" fill="#EEEDFE"/><text x="469" y="163" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">R</text>
+<rect x="555" y="150" width="28" height="18" rx="3" fill="#E6F1FB"/><text x="569" y="163" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">C</text>
+<rect x="655" y="150" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="669" y="163" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="755" y="150" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="769" y="163" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="40" y="176" width="820" height="30" fill="white"/>
+<text x="50" y="196" font-size="10" fill="#333">CRUD заявок и абитуриентов</text>
+<rect x="355" y="182" width="28" height="18" rx="3" fill="#FCEBEB"/><text x="369" y="195" text-anchor="middle" font-size="10" font-weight="bold" fill="#791F1F">A</text>
+<rect x="455" y="182" width="28" height="18" rx="3" fill="#EEEDFE"/><text x="469" y="195" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">R</text>
+<rect x="555" y="182" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="569" y="195" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="655" y="182" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="669" y="195" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="755" y="182" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="769" y="195" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="40" y="208" width="820" height="30" fill="#fafafa"/>
+<text x="50" y="228" font-size="10" fill="#333">Валидации (Pydantic)</text>
+<rect x="355" y="214" width="28" height="18" rx="3" fill="#FCEBEB"/><text x="369" y="227" text-anchor="middle" font-size="10" font-weight="bold" fill="#791F1F">A</text>
+<rect x="455" y="214" width="28" height="18" rx="3" fill="#E6F1FB"/><text x="469" y="227" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">C</text>
+<rect x="555" y="214" width="28" height="18" rx="3" fill="#EEEDFE"/><text x="569" y="227" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">R</text>
+<rect x="655" y="214" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="669" y="227" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="755" y="214" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="769" y="227" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="40" y="240" width="820" height="30" fill="white"/>
+<text x="50" y="260" font-size="10" fill="#333">Дашборд метрики (API)</text>
+<rect x="355" y="246" width="28" height="18" rx="3" fill="#FCEBEB"/><text x="369" y="259" text-anchor="middle" font-size="10" font-weight="bold" fill="#791F1F">A</text>
+<rect x="455" y="246" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="469" y="259" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="555" y="246" width="28" height="18" rx="3" fill="#EEEDFE"/><text x="569" y="259" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">R</text>
+<rect x="655" y="246" width="28" height="18" rx="3" fill="#E6F1FB"/><text x="669" y="259" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">C</text>
+<rect x="755" y="246" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="769" y="259" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="40" y="272" width="820" height="30" fill="#fafafa"/>
+<text x="50" y="292" font-size="10" fill="#333">Экспорт CSV</text>
+<rect x="355" y="278" width="28" height="18" rx="3" fill="#FCEBEB"/><text x="369" y="291" text-anchor="middle" font-size="10" font-weight="bold" fill="#791F1F">A</text>
+<rect x="455" y="278" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="469" y="291" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="555" y="278" width="28" height="18" rx="3" fill="#EEEDFE"/><text x="569" y="291" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">R</text>
+<rect x="655" y="278" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="669" y="291" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="755" y="278" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="769" y="291" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="40" y="304" width="820" height="30" fill="white"/>
+<text x="50" y="324" font-size="10" fill="#333">Дашборд UI (карточки, графики)</text>
+<rect x="355" y="310" width="28" height="18" rx="3" fill="#FCEBEB"/><text x="369" y="323" text-anchor="middle" font-size="10" font-weight="bold" fill="#791F1F">A</text>
+<rect x="455" y="310" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="469" y="323" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="555" y="310" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="569" y="323" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="655" y="310" width="28" height="18" rx="3" fill="#EEEDFE"/><text x="669" y="323" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">R</text>
+<rect x="755" y="310" width="28" height="18" rx="3" fill="#E6F1FB"/><text x="769" y="323" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">C</text>
+<rect x="40" y="336" width="820" height="30" fill="#fafafa"/>
+<text x="50" y="356" font-size="10" fill="#333">Таблица заявок и фильтры</text>
+<rect x="355" y="342" width="28" height="18" rx="3" fill="#FCEBEB"/><text x="369" y="355" text-anchor="middle" font-size="10" font-weight="bold" fill="#791F1F">A</text>
+<rect x="455" y="342" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="469" y="355" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="555" y="342" width="28" height="18" rx="3" fill="#F1EFE8"/><text x="569" y="355" text-anchor="middle" font-size="10" font-weight="bold" fill="#5F5E5A">I</text>
+<rect x="655" y="342" width="28" height="18" rx="3" fill="#E6F1FB"/><text x="669" y="355" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">C</text>
+<rect x="755" y="342" width="28" height="18" rx="3" fill="#EEEDFE"/><text x="769" y="355" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">R</text>
+<rect x="40" y="368" width="820" height="30" fill="white"/>
+<text x="50" y="388" font-size="10" fill="#333">Презентация для защиты</text>
+<rect x="355" y="374" width="28" height="18" rx="3" fill="#EEEDFE"/><text x="369" y="387" text-anchor="middle" font-size="10" font-weight="bold" fill="#3C3489">R</text>
+<rect x="455" y="374" width="28" height="18" rx="3" fill="#E6F1FB"/><text x="469" y="387" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">C</text>
+<rect x="555" y="374" width="28" height="18" rx="3" fill="#E6F1FB"/><text x="569" y="387" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">C</text>
+<rect x="655" y="374" width="28" height="18" rx="3" fill="#E6F1FB"/><text x="669" y="387" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">C</text>
+<rect x="755" y="374" width="28" height="18" rx="3" fill="#E6F1FB"/><text x="769" y="387" text-anchor="middle" font-size="10" font-weight="bold" fill="#0C447C">C</text>
+<line x1="40" y1="400" x2="860" y2="400" stroke="#eee"/>
+<rect x="100" y="420" width="20" height="16" rx="3" fill="#EEEDFE"/><text x="126" y="433" font-size="10" font-weight="bold" fill="#3C3489">R</text><text x="142" y="433" font-size="10" fill="#666">Responsible (делает)</text>
+<rect x="300" y="420" width="20" height="16" rx="3" fill="#FCEBEB"/><text x="326" y="433" font-size="10" font-weight="bold" fill="#791F1F">A</text><text x="342" y="433" font-size="10" fill="#666">Accountable (отвечает)</text>
+<rect x="520" y="420" width="20" height="16" rx="3" fill="#E6F1FB"/><text x="546" y="433" font-size="10" font-weight="bold" fill="#0C447C">C</text><text x="562" y="433" font-size="10" fill="#666">Consulted (советует)</text>
+<rect x="720" y="420" width="20" height="16" rx="3" fill="#F1EFE8"/><text x="746" y="433" font-size="10" font-weight="bold" fill="#5F5E5A">I</text><text x="762" y="433" font-size="10" fill="#666">Informed</text>
+</svg>
