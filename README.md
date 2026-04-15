@@ -1,276 +1,164 @@
-# 🎓 Мониторинг приёмной кампании
+# Мониторинг приёмной кампании 
 
-Дашборд для отслеживания заявок, зачислений и конверсии приёмной кампании университета.
+| Версия | Статус | Дата создания | Дата обновления |
+|--------|--------|---------------|-----------------|
+| v0.8   | MVP    | 2026-03-13    | 2026-04-15      |
 
----
+О документе: корневой README описывает проект, структуру репозитория, этапы развития решения и правила работы с документацией.
 
-## 📄 Документация проекта
+Для кого: для команды проекта, преподавателя и любого участника, который впервые открывает репозиторий.
 
-| Документ | Описание |
-|----------|----------|
-| [project_card.docx](docs/project_card.docx) | Карточка проекта — цели, метрики, глоссарий, команда |
-| [user_stories.md](docs/user_stories.md) | User stories по ролям с приоритетами MoSCoW |
-| [status_diagram.svg](docs/status_diagram.svg) | Диаграмма статусов заявки |
-| [erd_diagram.svg](docs/erd_diagram.svg) | ERD — схема базы данных |
-| [api-contract.md](docs/api-contract.md) | JSON-контракт всех API эндпоинтов |
-| [demo-scenario.md](docs/demo-scenario.md) | Демо-сценарий для защиты проекта |
+Основано на: кейс №1 «Дашборд мониторинга приёмной кампании (университет)», дисциплина «Основы проектной деятельности».
 
----
+## Быстрые ссылки
 
-## 👥 Команда и роли
+Индексы контрольных точек (хакатонов):
 
-| Участник | Роль | Зона ответственности |
-|----------|------|----------------------|
-| jadoreblessed | Team Lead | Архитектура, ревью PR, координация |
-| — | Backend Dev | FastAPI, PostgreSQL, REST API |
-| — | Backend Dev | Генерация данных, валидации, экспорт CSV |
-| — | Frontend Dev | Дашборд, фильтры, графики |
-| — | Frontend Dev | Карточка заявки, таблицы, UI-компоненты |
+- [CP1: карточка проекта, команда, WBS, риски](docs/90-checkpoints/CP1-deliverables.md)
+- [CP2: user stories, MoSCoW, персонажи, User Story Map](docs/90-checkpoints/CP2-deliverables.md)
+- [CP3: Event Storming, BPMN, модель данных, ERD](docs/90-checkpoints/CP3-deliverables.md)
 
----
+Карта документации: [docs/README.md](docs/README.md)
 
-## 🏗️ Архитектура проекта
+## О чём проект
+
+Приёмная комиссия РТУ МИРЭА работает с Excel-таблицами вручную. Нет оперативной аналитики — конверсию считают в конце кампании, когда уже поздно реагировать на провалы набора. Формирование одного отчёта занимает 2-3 часа.
+
+Проект решает эту проблему: веб-дашборд показывает конверсию в реальном времени, позволяет фильтровать заявки по статусу, волне и источнику, экспортировать отчёты в CSV одной кнопкой.
+
+Ключевая метрика: **конверсия = enrolled / total × 100%**. Целевое значение: 30%+. Время формирования отчёта: менее 1 секунды.
+
+## Команда проекта
+
+| ФИО | Роль | Логин GitVerse | Зона ответственности |
+|-----|------|----------------|---------------------|
+| Зырянов Владислав Александрович | Team Lead | jadoreblessed | Архитектура, координация, MVP, документация |
+| Груздев Владислав Евгеньевич | Backend Dev #1 | — | Модели БД, CRUD заявок/абитуриентов/программ, REST API |
+| Коба Тимофей Сергеевич | Backend Dev #2 | — | Pydantic-валидации, дашборд-метрики, экспорт CSV, генерация синтетики |
+| Комаров Никита Кириллович | Frontend Dev #1 | — | Дашборд с графиками, фильтры, подключение к API |
+| Саженин Михаил Антонович | Frontend Dev #2 | — | Таблица заявок, карточка заявки, лог статусов, экспорт |
+
+## Что уже есть на текущем этапе
+
+- устав проекта, карточка проекта;
+- персонажи пользователей (3 персоны);
+- user stories (13 историй) и User Story Map;
+- матрица MoSCoW (20 требований);
+- WBS (декомпозиция на 5 блоков);
+- матрица рисков;
+- RACI-матрица;
+- Roadmap на 15 недель;
+- Event Storming (карта событий, команды/политики, агрегаты, Bounded Context);
+- BPMN-схема процесса (3 дорожки, 3 шлюза);
+- ER-диаграмма (4 таблицы, нормализация до 3НФ);
+- описание структуры БД;
+- рабочий MVP: FastAPI backend + React frontend;
+- 162 тестовые заявки на реальных программах МИРЭА;
+- Swagger-документация API;
+- техническая документация по ГОСТ 2.105-95;
+- фич-лист на 50 задач по спринтам.
+
+## Технологический стек
+
+| Слой | Технологии |
+|------|-----------|
+| Backend | Python 3.12, FastAPI, SQLAlchemy, Pydantic v2, PostgreSQL 16 |
+| Frontend | React 18, TypeScript, Vite, Axios |
+| Инструменты | Git, VS Code, Swagger, pgAdmin |
+
+## Структура репозитория
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    FRONTEND                         │
-│          React + TypeScript + Recharts              │
-│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
-│  │Dashboard │  │ Таблица  │  │ Карточка заявки  │  │
-│  │(графики) │  │ заявок   │  │ + лог статусов   │  │
-│  └────┬─────┘  └────┬─────┘  └────────┬─────────┘  │
-└───────┼─────────────┼─────────────────┼─────────────┘
-        │   REST API (JSON)              │
-┌───────┼─────────────┼─────────────────┼─────────────┐
-│       ▼             ▼                 ▼             │
-│                  BACKEND                            │
-│              FastAPI (Python)                       │
-│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
-│  │/dashboard│  │/applic.. │  │  /export/report  │  │
-│  │ метрики  │  │  CRUD    │  │     CSV          │  │
-│  └────┬─────┘  └────┬─────┘  └────────┬─────────┘  │
-└───────┼─────────────┼─────────────────┼─────────────┘
-        │   SQLAlchemy ORM               │
-┌───────▼─────────────▼─────────────────▼─────────────┐
-│                  PostgreSQL                         │
-│  applicants │ applications │ programs │ status_logs │
-└─────────────────────────────────────────────────────┘
-```
-
----
-
-## 📁 Структура репозитория
-
-```
-Monitoring-the-admission-campaignOmO/
-│
-├── backend/                        # FastAPI приложение
+├── backend/
+│   ├── main.py
 │   ├── app/
-│   │   ├── routers/               # Эндпоинты API
-│   │   │   ├── applicants.py      # CRUD абитуриентов
-│   │   │   ├── applications.py    # CRUD заявок + смена статуса
-│   │   │   ├── programs.py        # CRUD программ
-│   │   │   ├── dashboard.py       # Метрики и аналитика
-│   │   │   ├── export.py          # Экспорт CSV
-│   │   │   └── seed.py            # Генерация тестовых данных
-│   │   ├── models.py              # SQLAlchemy модели (таблицы БД)
-│   │   ├── schemas.py             # Pydantic схемы + валидации
-│   │   └── database.py            # Подключение к PostgreSQL
-│   ├── main.py                    # Точка входа
-│   ├── requirements.txt           # Зависимости Python
-│   └── .env.example               # Пример переменных окружения
-│
-├── frontend/                       # React приложение
-│   ├── src/
-│   │   ├── components/            # UI-компоненты
-│   │   │   ├── Dashboard/         # Дашборд с графиками
-│   │   │   ├── ApplicationCard/   # Карточка заявки
-│   │   │   ├── ApplicationTable/  # Таблица заявок
-│   │   │   └── Filters/           # Панель фильтров
-│   │   ├── pages/                 # Страницы приложения
-│   │   ├── api/                   # Запросы к бэкенду (fetch/axios)
-│   │   ├── types/                 # TypeScript типы
-│   │   └── App.tsx
-│   ├── package.json
-│   └── .env.example
-│
-├── docs/                           # Документация
-│   ├── api-contract.md            # JSON-контракт эндпоинтов
-│   ├── db-schema.md               # Схема базы данных (ERD)
-│   └── demo-scenario.md           # Демо-сценарий для защиты
-│
-├── data/                           # Синтетические датасеты
-│   ├── T1/                        # Тестовый набор (≥100 заявок)
-│   │   ├── applicants.csv
-│   │   ├── applications.csv
-│   │   └── programs.csv
-│   └── T2/                        # Расширенный набор
-│
-└── README.md                       # Этот файл
+│   │   ├── database.py
+│   │   ├── models.py
+│   │   ├── schemas.py
+│   │   └── routers/
+│   │       ├── applicants.py
+│   │       ├── programs.py
+│   │       ├── applications.py
+│   │       ├── dashboard.py
+│   │       ├── export.py
+│   │       └── seed.py
+├── frontend/
+│   └── src/
+│       ├── App.tsx
+│       ├── api.ts
+│       └── App.css
+├── docs/
+│   ├── README.md                  # Карта документации
+│   ├── 00-governance/             # Устав, карточка, RACI
+│   ├── 01-discovery/              # Персонажи
+│   ├── 02-requirements/           # User Stories, MoSCoW, User Story Map
+│   ├── 03-planning/               # WBS, Roadmap, риски, фич-лист
+│   ├── 04-design/                 # Event Storming, BPMN, ERD
+│   ├── 05-technical/              # Документация по ГОСТ
+│   └── 90-checkpoints/            # Индексы хакатонов CP1-CP3
+├── TASKS.md
+├── FEATURE_LIST.md
+└── README.md
 ```
 
----
-
-## 🗄️ Схема базы данных
-
-```
-applicants                    programs
-──────────────────            ──────────────────────
-id          INT PK            program_code  VARCHAR PK
-fio         VARCHAR           program_name  VARCHAR
-birth_year  INT               faculty       VARCHAR
-region      VARCHAR
-
-applications
-──────────────────────────────────────────
-id                INT PK
-applicant_id      INT FK → applicants.id
-program_code      VARCHAR FK → programs.program_code
-wave              INT          (1, 2, 3 — волна зачисления)
-source            VARCHAR      (site | olymp | aggregator | other)
-status            VARCHAR      (new | review | enrolled | rejected)
-created_at        TIMESTAMP
-status_changed_at TIMESTAMP
-
-status_logs                   (трассируемость — лог всех смен статуса)
-──────────────────────────────
-id              INT PK
-application_id  INT FK
-old_status      VARCHAR
-new_status      VARCHAR
-changed_at      TIMESTAMP
-changed_by      VARCHAR
-```
-
----
-
-## 📊 Метрики дашборда
-
-| Метрика | Формула |
-|---------|---------|
-| `applications` | `COUNT(applications)` |
-| `enrolled` | `COUNT(applications WHERE status = 'enrolled')` |
-| `conversion` | `enrolled / applications` |
-
-**Срезы:** по программе · по факультету · по источнику · по волне · по периоду
-
----
-
-## 🔌 API эндпоинты
+## API эндпоинты
 
 | Метод | URL | Описание |
 |-------|-----|----------|
-| `GET` | `/dashboard/` | Все метрики с фильтрами |
-| `GET` | `/applications/` | Список заявок |
-| `GET` | `/applications/{id}` | Карточка заявки |
-| `POST` | `/applications/` | Создать заявку |
-| `PATCH` | `/applications/{id}/status` | Сменить статус |
-| `GET` | `/applications/{id}/logs` | Лог статусов |
-| `GET` | `/export/report` | Скачать CSV-отчёт |
-| `GET` | `/programs/` | Список программ |
-| `POST` | `/seed/generate` | Сгенерировать тестовые данные |
+| POST | /applicants/ | Создать абитуриента |
+| GET | /applicants/ | Список абитуриентов |
+| GET | /applicants/{id} | Получить абитуриента |
+| DELETE | /applicants/{id} | Удалить абитуриента |
+| POST | /programs/ | Создать программу |
+| GET | /programs/ | Список программ |
+| POST | /applications/ | Создать заявку |
+| GET | /applications/ | Список заявок (фильтры: status, source, wave, program_id) |
+| PATCH | /applications/{id}/status | Сменить статус заявки |
+| DELETE | /applications/{id} | Удалить заявку |
+| GET | /dashboard/ | Метрики: total, enrolled, conversion_rate |
+| GET | /dashboard/by-program | Конверсия по программам |
+| GET | /dashboard/by-source | Статистика по источникам |
+| GET | /export/raw | CSV сырых данных |
+| GET | /export/report | CSV агрегированного отчёта |
+| POST | /seed/generate | Генерация тестовых данных |
 
-**Фильтры для `/dashboard/` и `/export/report`:**
-```
-?date_from=2024-03-01&date_to=2024-08-31&program_code=CS-01&source=site&wave=1
-```
+## План развития проекта
 
----
+| Этап | Период | Фокус |
+|------|--------|-------|
+| Исследование и рамки | нед. 1-4 | Проблема, пользователи, требования, состав MVP |
+| Проектирование | нед. 5-8 | Event Storming, BPMN, ERD, модель данных |
+| Разработка MVP | нед. 9-12 | Backend (FastAPI + PostgreSQL), Frontend (React + TS) |
+| Доработка и защита | нед. 13-15 | Графики, авторизация, презентация, демо |
 
-## 🚀 Быстрый старт
+## Календарный ориентир
 
-### Шаг 1 — Клонировать репозиторий
+- Старт проекта: `2026-03-13`
+- Контрольная точка 1 (CP1): `2026-03-18`
+- Контрольная точка 2 (CP2): `2026-03-25`
+- Контрольная точка 3 (CP3): `2026-04-15`
+
+## Быстрый старт
 
 ```bash
-git clone https://gitverse.ru/jadoreblessed/Monitoring-the-admission-campaignOmO.git
-cd Monitoring-the-admission-campaignOmO
-```
-
-### Шаг 2 — Создать базу данных
-
-Открыть **pgAdmin** (или psql) и выполнить:
-```sql
-CREATE DATABASE admission_db;
-```
-
-### Шаг 3 — Запустить бэкенд
-
-```bash
+# Backend
 cd backend
-pip install -r requirements.txt
-cp .env.example .env        # заполнить DATABASE_URL
-uvicorn main:app --reload
-```
+python -m venv venv
+venv\Scripts\activate
+pip install fastapi uvicorn sqlalchemy psycopg2-binary pydantic[email] python-dotenv
+uvicorn main:app --reload        # http://127.0.0.1:8000/docs
 
-Swagger UI: **http://localhost:8000/docs**
-
-### Шаг 4 — Запустить фронтенд
-
-```bash
+# Frontend (в отдельном терминале)
 cd frontend
 npm install
-cp .env.example .env        # VITE_API_URL=http://localhost:8000
-npm run dev
+npm run dev -- --host 127.0.0.1  # http://127.0.0.1:5173/
 ```
 
-Приложение: **http://localhost:5173**
+## Правила ведения документации
 
-### Шаг 5 — Сгенерировать тестовые данные
-
-```bash
-curl -X POST http://localhost:8000/seed/generate
-```
-
-или открыть в браузере **http://localhost:8000/docs** → `POST /seed/generate` → Try it out → Execute
-
----
-
-## 🌿 Ветки и процесс работы
-
-```
-main          — стабильная версия (только через PR)
-dev           — общая ветка разработки
-feature/...   — новая функциональность
-fix/...       — исправление багов
-```
-
-**Правила:**
-1. Никто не пушит напрямую в `main`
-2. Каждая задача — отдельная ветка от `dev`
-3. Перед мержем — Pull Request + ревью от Team Lead
-4. Названия веток: `feature/dashboard-filters`, `fix/csv-export-encoding`
-
-**Пример:**
-```bash
-git checkout dev
-git pull
-git checkout -b feature/dashboard-filters
-# ... работаешь ...
-git push origin feature/dashboard-filters
-# создаёшь Pull Request в dev
-```
-
----
-
-## ✅ Критерии приёмки (из задания)
-
-- [ ] ≥ 3 метрики на дашборде (applications, enrolled, conversion)
-- [ ] Фильтры: период / направление / источник / волна
-- [ ] Экспорт CSV с указанием применённых фильтров
-- [ ] Воспроизводимый демо-сценарий
-- [ ] Тестовый датасет T1 ≥ 100 заявок
-- [ ] ≥ 5 валидаций данных
-- [ ] Лог смены статусов (трассируемость)
-
----
-
-## 🛠️ Стек технологий
-
-| Слой | Технология |
-|------|-----------|
-| Backend | Python 3.12, FastAPI, SQLAlchemy |
-| Database | PostgreSQL 16 |
-| Validation | Pydantic v2 |
-| Frontend | React, TypeScript |
-| Charts | Recharts |
-| VCS | Git, GitVerse |
+- Каждый документ начинается с шапки: версия, статус, дата
+- Документы организованы по типам артефактов, не по этапам
+- Индексы контрольных точек хранят ссылки на артефакты
+- Коммиты: `feat:`, `docs:`, `fix:`, `chore:`
+- Ветки от `dev`, именуются `feature/название-задачи`
+- Pull Request в `dev`, ревью — Team Lead
