@@ -1,0 +1,170 @@
+<svg width="1100" height="650" xmlns="http://www.w3.org/2000/svg" style="font-family:Arial,sans-serif;background:white">
+<text x="550" y="24" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">Макеты экранов UI — Мониторинг приёмной кампании</text>
+
+<!-- Screen 1: Dashboard -->
+<rect x="20" y="45" width="240" height="260" rx="8" fill="white" stroke="#ddd"/>
+<rect x="20" y="45" width="240" height="28" rx="8" fill="#2563eb"/>
+<rect x="20" y="65" width="240" height="8" fill="#2563eb"/>
+<text x="140" y="64" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Дашборд</text>
+<rect x="30" y="82" width="70" height="40" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="65" y="100" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e293b">162</text>
+<text x="65" y="114" text-anchor="middle" font-size="8" fill="#94a3b8">Заявок</text>
+<rect x="105" y="82" width="70" height="40" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<rect x="105" y="82" width="3" height="40" rx="0" fill="#22c55e"/>
+<text x="143" y="100" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e293b">53</text>
+<text x="143" y="114" text-anchor="middle" font-size="8" fill="#94a3b8">Зачислено</text>
+<rect x="180" y="82" width="70" height="40" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<rect x="180" y="82" width="3" height="40" rx="0" fill="#3b82f6"/>
+<text x="218" y="100" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e293b">32.7%</text>
+<text x="218" y="114" text-anchor="middle" font-size="8" fill="#94a3b8">Конверсия</text>
+<rect x="30" y="130" width="220" height="60" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="140" y="165" text-anchor="middle" font-size="9" fill="#94a3b8">График конверсии по программам</text>
+<rect x="30" y="200" width="105" height="50" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="82" y="230" text-anchor="middle" font-size="9" fill="#94a3b8">Источники (pie)</text>
+<rect x="145" y="200" width="105" height="50" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="197" y="230" text-anchor="middle" font-size="9" fill="#94a3b8">Волны (bar)</text>
+<text x="140" y="290" text-anchor="middle" font-size="9" fill="#64748b">Роль: Комиссия / Аналитик</text>
+
+<!-- Screen 2: Applications -->
+<rect x="280" y="45" width="240" height="260" rx="8" fill="white" stroke="#ddd"/>
+<rect x="280" y="45" width="240" height="28" rx="8" fill="#2563eb"/>
+<rect x="280" y="65" width="240" height="8" fill="#2563eb"/>
+<text x="400" y="64" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Таблица заявок</text>
+<rect x="290" y="82" width="80" height="18" rx="3" fill="#f1f5f9" stroke="#e2e8f0"/>
+<text x="330" y="94" text-anchor="middle" font-size="8" fill="#64748b">Все статусы</text>
+<rect x="375" y="82" width="50" height="18" rx="3" fill="#2563eb"/>
+<text x="400" y="94" text-anchor="middle" font-size="8" fill="white">CSV</text>
+<rect x="290" y="106" width="220" height="14" rx="0" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="300" y="116" font-size="7" font-weight="bold" fill="#64748b">ID</text>
+<text x="325" y="116" font-size="7" font-weight="bold" fill="#64748b">ФИО</text>
+<text x="395" y="116" font-size="7" font-weight="bold" fill="#64748b">Программа</text>
+<text x="470" y="116" font-size="7" font-weight="bold" fill="#64748b">Статус</text>
+<rect x="290" y="120" width="220" height="14" rx="0" fill="white" stroke="#f1f5f9"/>
+<text x="300" y="130" font-size="7" fill="#333">1</text><text x="325" y="130" font-size="7" fill="#333">Иванов А.Д.</text><text x="395" y="130" font-size="7" fill="#333">Прогр. инж.</text>
+<rect x="460" y="122" width="40" height="10" rx="5" fill="#d1fae5"/><text x="480" y="130" text-anchor="middle" font-size="6" fill="#065f46">enrolled</text>
+<rect x="290" y="134" width="220" height="14" rx="0" fill="#f8fafc" stroke="#f1f5f9"/>
+<text x="300" y="144" font-size="7" fill="#333">2</text><text x="325" y="144" font-size="7" fill="#333">Петрова М.С.</text><text x="395" y="144" font-size="7" fill="#333">Инф. безоп.</text>
+<rect x="460" y="136" width="40" height="10" rx="5" fill="#fef3c7"/><text x="480" y="144" text-anchor="middle" font-size="6" fill="#92400e">review</text>
+<rect x="290" y="148" width="220" height="14" rx="0" fill="white" stroke="#f1f5f9"/>
+<text x="300" y="158" font-size="7" fill="#333">3</text><text x="325" y="158" font-size="7" fill="#333">Сидоров Д.В.</text><text x="395" y="158" font-size="7" fill="#333">Комп. науки</text>
+<rect x="460" y="150" width="40" height="10" rx="5" fill="#fee2e2"/><text x="480" y="158" text-anchor="middle" font-size="6" fill="#991b1b">rejected</text>
+<text x="400" y="290" text-anchor="middle" font-size="9" fill="#64748b">Роль: Комиссия</text>
+
+<!-- Screen 3: Login (Applicant) -->
+<rect x="540" y="45" width="240" height="260" rx="8" fill="white" stroke="#ddd"/>
+<rect x="540" y="45" width="240" height="28" rx="8" fill="#f59e0b"/>
+<rect x="540" y="65" width="240" height="8" fill="#f59e0b"/>
+<text x="660" y="64" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Авторизация</text>
+<text x="660" y="110" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">Личный кабинет</text>
+<text x="660" y="125" text-anchor="middle" font-size="9" fill="#94a3b8">абитуриента</text>
+<rect x="580" y="140" width="160" height="22" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="590" y="155" font-size="9" fill="#94a3b8">Email</text>
+<rect x="580" y="168" width="160" height="22" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="590" y="183" font-size="9" fill="#94a3b8">Пароль</text>
+<rect x="580" y="200" width="160" height="26" rx="4" fill="#f59e0b"/>
+<text x="660" y="217" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Войти</text>
+<text x="660" y="250" text-anchor="middle" font-size="8" fill="#94a3b8">Нет аккаунта? Регистрация</text>
+<text x="660" y="290" text-anchor="middle" font-size="9" fill="#64748b">Роль: Абитуриент</text>
+
+<!-- Screen 4: My Applications (Applicant) -->
+<rect x="800" y="45" width="240" height="260" rx="8" fill="white" stroke="#ddd"/>
+<rect x="800" y="45" width="240" height="28" rx="8" fill="#f59e0b"/>
+<rect x="800" y="65" width="240" height="8" fill="#f59e0b"/>
+<text x="920" y="64" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Мои заявки</text>
+<text x="820" y="95" font-size="10" font-weight="bold" fill="#333">Иванов Алексей Д.</text>
+<rect x="810" y="106" width="220" height="14" rx="0" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="820" y="116" font-size="7" font-weight="bold" fill="#64748b">Программа</text>
+<text x="920" y="116" font-size="7" font-weight="bold" fill="#64748b">Баллы</text>
+<text x="980" y="116" font-size="7" font-weight="bold" fill="#64748b">Статус</text>
+<rect x="810" y="120" width="220" height="14" rx="0" fill="white" stroke="#f1f5f9"/>
+<text x="820" y="130" font-size="7" fill="#333">Прогр. инженерия</text><text x="920" y="130" font-size="7" fill="#333">267</text>
+<rect x="968" y="122" width="40" height="10" rx="5" fill="#d1fae5"/><text x="988" y="130" text-anchor="middle" font-size="6" fill="#065f46">enrolled</text>
+<rect x="810" y="134" width="220" height="14" rx="0" fill="#f8fafc" stroke="#f1f5f9"/>
+<text x="820" y="144" font-size="7" fill="#333">Комп. науки</text><text x="920" y="144" font-size="7" fill="#333">267</text>
+<rect x="968" y="136" width="40" height="10" rx="5" fill="#fef3c7"/><text x="988" y="144" text-anchor="middle" font-size="6" fill="#92400e">review</text>
+<rect x="850" y="170" width="140" height="24" rx="4" fill="#f59e0b"/>
+<text x="920" y="186" text-anchor="middle" font-size="9" font-weight="bold" fill="white">Подать заявку</text>
+<text x="920" y="290" text-anchor="middle" font-size="9" fill="#64748b">Роль: Абитуриент</text>
+
+<!-- Row 2 -->
+<!-- Screen 5: Submit Application -->
+<rect x="20" y="330" width="240" height="260" rx="8" fill="white" stroke="#ddd"/>
+<rect x="20" y="330" width="240" height="28" rx="8" fill="#f59e0b"/>
+<rect x="20" y="350" width="240" height="8" fill="#f59e0b"/>
+<text x="140" y="349" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Подача заявки</text>
+<rect x="40" y="370" width="200" height="20" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="50" y="384" font-size="8" fill="#94a3b8">Программа обучения</text>
+<rect x="40" y="396" width="200" height="20" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="50" y="410" font-size="8" fill="#94a3b8">Баллы ЕГЭ (сумма)</text>
+<rect x="40" y="422" width="200" height="20" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="50" y="436" font-size="8" fill="#94a3b8">Волна (1 / 2)</text>
+<rect x="40" y="448" width="200" height="20" rx="4" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="50" y="462" font-size="8" fill="#94a3b8">Источник</text>
+<rect x="60" y="480" width="160" height="26" rx="4" fill="#f59e0b"/>
+<text x="140" y="497" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Отправить</text>
+<text x="140" y="575" text-anchor="middle" font-size="9" fill="#64748b">Роль: Абитуриент</text>
+
+<!-- Screen 6: Application Status -->
+<rect x="280" y="330" width="240" height="260" rx="8" fill="white" stroke="#ddd"/>
+<rect x="280" y="330" width="240" height="28" rx="8" fill="#f59e0b"/>
+<rect x="280" y="350" width="240" height="8" fill="#f59e0b"/>
+<text x="400" y="349" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Статус заявки</text>
+<text x="300" y="380" font-size="10" font-weight="bold" fill="#333">Программная инженерия</text>
+<circle cx="340" cy="410" r="10" fill="#2563eb"/><text x="340" y="414" text-anchor="middle" font-size="8" fill="white">1</text>
+<circle cx="390" cy="410" r="10" fill="#2563eb"/><text x="390" y="414" text-anchor="middle" font-size="8" fill="white">2</text>
+<circle cx="440" cy="410" r="10" fill="#ddd"/><text x="440" y="414" text-anchor="middle" font-size="8" fill="#999">3</text>
+<line x1="352" y1="410" x2="378" y2="410" stroke="#2563eb" stroke-width="2"/>
+<line x1="402" y1="410" x2="428" y2="410" stroke="#ddd" stroke-width="2"/>
+<rect x="300" y="435" width="200" height="16" rx="3" fill="#d1fae5"/>
+<text x="310" y="447" font-size="8" fill="#065f46">new — 20.06.2025</text>
+<rect x="300" y="455" width="200" height="16" rx="3" fill="#dbeafe"/>
+<text x="310" y="467" font-size="8" fill="#1e40af">review — 05.07.2025</text>
+<rect x="300" y="475" width="200" height="16" rx="3" fill="#f1f5f9"/>
+<text x="310" y="487" font-size="8" fill="#94a3b8">enrolled / rejected — ожидание</text>
+<text x="400" y="575" text-anchor="middle" font-size="9" fill="#64748b">Роль: Абитуриент</text>
+
+<!-- Screen 7: Application Card -->
+<rect x="540" y="330" width="240" height="260" rx="8" fill="white" stroke="#ddd"/>
+<rect x="540" y="330" width="240" height="28" rx="8" fill="#2563eb"/>
+<rect x="540" y="350" width="240" height="8" fill="#2563eb"/>
+<text x="660" y="349" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Карточка заявки</text>
+<text x="560" y="380" font-size="10" font-weight="bold" fill="#333">Иванов Алексей Д.</text>
+<rect x="555" y="390" width="210" height="14" rx="3" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="565" y="401" font-size="8" fill="#64748b">Email: ivanov@mail.ru</text>
+<rect x="555" y="408" width="210" height="14" rx="3" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="565" y="419" font-size="8" fill="#64748b">Тел: +79001234567</text>
+<rect x="555" y="426" width="210" height="14" rx="3" fill="#f8fafc" stroke="#e2e8f0"/>
+<text x="565" y="437" font-size="8" fill="#64748b">Прогр. инженерия | 267.5 баллов</text>
+<rect x="555" y="444" width="210" height="14" rx="3" fill="#d1fae5" stroke="#bbf7d0"/>
+<text x="565" y="455" font-size="8" fill="#065f46">Статус: enrolled</text>
+<text x="560" y="475" font-size="8" font-weight="bold" fill="#333">История:</text>
+<rect x="555" y="480" width="210" height="12" rx="2" fill="#f8fafc"/>
+<text x="565" y="490" font-size="7" fill="#64748b">new → review (15.06)</text>
+<rect x="555" y="494" width="210" height="12" rx="2" fill="#f8fafc"/>
+<text x="565" y="504" font-size="7" fill="#64748b">review → enrolled (02.08)</text>
+<text x="660" y="575" text-anchor="middle" font-size="9" fill="#64748b">Роль: Комиссия</text>
+
+<!-- Screen 8: Swagger -->
+<rect x="800" y="330" width="240" height="260" rx="8" fill="white" stroke="#ddd"/>
+<rect x="800" y="330" width="240" height="28" rx="8" fill="#85ea2d"/>
+<rect x="800" y="350" width="240" height="8" fill="#85ea2d"/>
+<text x="920" y="349" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Swagger UI</text>
+<rect x="815" y="370" width="50" height="14" rx="3" fill="#49cc90"/>
+<text x="840" y="380" text-anchor="middle" font-size="7" font-weight="bold" fill="white">GET</text>
+<text x="875" y="380" font-size="8" fill="#333">/applicants/</text>
+<rect x="815" y="390" width="50" height="14" rx="3" fill="#49cc90"/>
+<text x="840" y="400" text-anchor="middle" font-size="7" font-weight="bold" fill="white">GET</text>
+<text x="875" y="400" font-size="8" fill="#333">/dashboard/</text>
+<rect x="815" y="410" width="50" height="14" rx="3" fill="#fca130"/>
+<text x="840" y="420" text-anchor="middle" font-size="7" font-weight="bold" fill="white">POST</text>
+<text x="875" y="420" font-size="8" fill="#333">/applications/</text>
+<rect x="815" y="430" width="50" height="14" rx="3" fill="#50afe2"/>
+<text x="840" y="440" text-anchor="middle" font-size="7" font-weight="bold" fill="white">PATCH</text>
+<text x="875" y="440" font-size="8" fill="#333">/status</text>
+<rect x="815" y="450" width="50" height="14" rx="3" fill="#f93e3e"/>
+<text x="840" y="460" text-anchor="middle" font-size="7" font-weight="bold" fill="white">DELETE</text>
+<text x="875" y="460" font-size="8" fill="#333">/applications/{id}</text>
+<text x="920" y="575" text-anchor="middle" font-size="9" fill="#64748b">Автодокументация API</text>
+
+<text x="550" y="630" text-anchor="middle" font-size="10" fill="#888">Проект: Мониторинг приёмной кампании | Team Lead: Зырянов Владислав Александрович</text>
+</svg>
