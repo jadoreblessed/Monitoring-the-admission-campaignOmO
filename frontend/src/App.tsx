@@ -1,32 +1,42 @@
 import { useEffect, useState } from "react";
 import { fetchMetrics, fetchByProgram, fetchApplications, exportCSV } from "./api";
+import Cabinet from "./Cabinet";
 import "./App.css";
 
 function App() {
+  const [mode, setMode] = useState<"dashboard" | "cabinet">("dashboard");
   const [metrics, setMetrics] = useState<any>(null);
   const [programs, setPrograms] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState("");
 
-  // загружаем данные при открытии страницы
   useEffect(() => {
-    fetchMetrics().then((res) => setMetrics(res.data));
-    fetchByProgram().then((res) => setPrograms(res.data));
-    fetchApplications({}).then((res) => setApplications(res.data));
-  }, []);
+    if (mode === "dashboard") {
+      fetchMetrics().then((res) => setMetrics(res.data));
+      fetchByProgram().then((res) => setPrograms(res.data));
+      fetchApplications({}).then((res) => setApplications(res.data));
+    }
+  }, [mode]);
 
-  // фильтрация по статусу
   const handleFilter = (status: string) => {
     setStatusFilter(status);
     const params = status ? { status } : {};
     fetchApplications(params).then((res) => setApplications(res.data));
   };
 
+  if (mode === "cabinet") {
+    return <Cabinet onBack={() => setMode("dashboard")} />;
+  }
+
   return (
     <div className="container">
-      <h1>Мониторинг приёмной кампании РТУ МИРЭА</h1>
+      <div className="header-bar">
+        <h1>Мониторинг приёмной кампании РТУ МИРЭА</h1>
+        <button className="btn-cabinet" onClick={() => setMode("cabinet")}>
+          Личный кабинет абитуриента
+        </button>
+      </div>
 
-      {/* Карточки метрик */}
       {metrics && (
         <div className="cards">
           <div className="card">
@@ -37,6 +47,10 @@ function App() {
             <div className="card-value">{metrics.enrolled}</div>
             <div className="card-label">Зачислено</div>
           </div>
+          <div className="card card-red">
+            <div className="card-value">{metrics.rejected}</div>
+            <div className="card-label">Отклонено</div>
+          </div>
           <div className="card card-blue">
             <div className="card-value">{metrics.conversion_rate}%</div>
             <div className="card-label">Конверсия</div>
@@ -44,7 +58,6 @@ function App() {
         </div>
       )}
 
-      {/* Конверсия по программам */}
       <h2>Конверсия по программам</h2>
       <table>
         <thead>
@@ -69,7 +82,6 @@ function App() {
         </tbody>
       </table>
 
-      {/* Фильтры + экспорт */}
       <h2>Заявки</h2>
       <div className="filters">
         <select value={statusFilter} onChange={(e) => handleFilter(e.target.value)}>
@@ -82,7 +94,6 @@ function App() {
         <button onClick={exportCSV}>Экспорт CSV</button>
       </div>
 
-      {/* Таблица заявок */}
       <table>
         <thead>
           <tr>

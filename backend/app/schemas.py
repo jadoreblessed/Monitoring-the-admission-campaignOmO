@@ -80,3 +80,22 @@ class DashboardMetrics(BaseModel):
     total_applications: int  # всего заявок
     total_enrolled: int  # зачислено
     conversion_rate: float  # конверсия в процентах
+
+# === Авторизация абитуриента ===
+
+class ApplicantRegister(BaseModel):
+    full_name: str = Field(min_length=2, max_length=150)
+    email: EmailStr
+    phone: Optional[str] = Field(None, pattern=r"^\+7\d{10}$")
+    region: Optional[str] = None
+    password: str = Field(min_length=6)
+
+class ApplicantLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    applicant_id: int
+    full_name: str

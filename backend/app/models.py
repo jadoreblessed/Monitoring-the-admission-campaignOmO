@@ -11,7 +11,8 @@ class Applicant(Base):
     full_name = Column(String, nullable=False)  # ФИО
     email = Column(String, unique=True, nullable=False)  # почта
     phone = Column(String)  # телефон
-    region = Column(String)  # регион откуда абитуриент
+    region = Column(String)  # регион откуда абитуриент   
+    hashed_password = Column(String, nullable=True)  # пароль (хеш)
     created_at = Column(DateTime, default=datetime.utcnow)  # дата создания
 
     applications = relationship("Application", back_populates="applicant")  # связь с заявками

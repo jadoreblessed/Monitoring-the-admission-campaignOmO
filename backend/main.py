@@ -1,8 +1,9 @@
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 from app.routers import applications, programs, applicants, dashboard, export, seed
-
+from app.routers import applicants, programs, applications, dashboard, export, seed, auth, cabinet
 Base.metadata.create_all(bind=engine) #Создаем все таблицы в базе данных
 #создаем приложение
 app = FastAPI( 
@@ -26,6 +27,8 @@ app.include_router(applications.router)
 app.include_router(dashboard.router)
 app.include_router(export.router)
 app.include_router(seed.router)
+app.include_router(auth.router)
+app.include_router(cabinet.router)
 
 #Главная страница
 @app.get("/", tags=["Главная"])
