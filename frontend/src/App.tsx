@@ -20,7 +20,8 @@ function App() {
 
   const handleFilter = (s: string) => {
     setStatusFilter(s);
-    fetchApplications(s ? { status: s } : {} as Record<string, string>).then((r) => setApplications(r.data));
+    const params: Record<string, string> = s ? { status: s } : {};
+    fetchApplications(params).then((r) => setApplications(r.data));
   };
 
   const statusText: Record<string, string> = {
