@@ -20,8 +20,8 @@ function App() {
 
   const handleFilter = (s: string) => {
     setStatusFilter(s);
-    fetchApplications(s ? { status: s } : {}).then((r) => setApplications(r.data));
-  };
+    fetchApplications(s ? { status: s } : {} as Record<string, string>).then((r) => setApplications(r.data));
+};
 
   const statusText: Record<string, string> = {
     new: "Новая", review: "Рассмотрение", enrolled: "Зачислен", rejected: "Отклонён"
