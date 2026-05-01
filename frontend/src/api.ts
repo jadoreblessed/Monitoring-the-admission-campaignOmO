@@ -9,7 +9,7 @@ export const fetchMetrics = () => API.get("/dashboard/");
 export const fetchByProgram = () => API.get("/dashboard/by-program");
 
 // список заявок с фильтрами
-export const fetchApplications = (params: Record<string, string>) =>
+export const fetchApplications = (params: Record<string, string> = {}) =>
   API.get("/applications/", { params });
 
 // экспорт CSV
