@@ -1,53 +1,30 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models import Applicant
-from app.schemas import ApplicantRegister, ApplicantLogin, TokenResponse
-from app.auth import hash_password, verify_password, create_access_token
+import os
+from datetime import datetime, timedelta, timezone
+from jose import jwt
+from passlib.context import CryptContext
 
-router = APIRouter(prefix="/auth", tags=["Авторизация абитуриента"])
+SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 часа
 
-# регистрация нового абитуриента
-@router.post("/register", response_model=TokenResponse)
-def register(data: ApplicantRegister, db: Session = Depends(get_db)):
-    # проверяем что email не занят
-    exists = db.query(Applicant).filter(Applicant.email == data.email).first()
-    if exists:
-        raise HTTPException(status_code=400, detail="Email уже зарегистрирован")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    # создаём абитуриента с хешированным паролем
-    applicant = Applicant(
-        full_name=data.full_name,
-        email=data.email,
-        phone=data.phone,
-        region=data.region,
-        hashed_password=hash_password(data.password)
-    )
-    db.add(applicant)
-    db.commit()
-    db.refresh(applicant)
+# хешируем пароль перед сохранением в БД
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
 
-    # возвращаем токен
-    token = create_access_token({"sub": applicant.email})
-    return TokenResponse(
-        access_token=token,
-        applicant_id=applicant.id,
-        full_name=applicant.full_name
-    )
+# проверяем пароль при входе
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
 
-# вход по email + пароль
-@router.post("/login", response_model=TokenResponse)
-def login(data: ApplicantLogin, db: Session = Depends(get_db)):
-    applicant = db.query(Applicant).filter(Applicant.email == data.email).first()
-    if not applicant or not applicant.hashed_password:
-        raise HTTPException(status_code=401, detail="Неверный email или пароль")
+# создаём JWT-токен
+def create_access_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-    if not verify_password(data.password, applicant.hashed_password):
-        raise HTTPException(status_code=401, detail="Неверный email или пароль")
-
-    token = create_access_token({"sub": applicant.email})
-    return TokenResponse(
-        access_token=token,
-        applicant_id=applicant.id,
-        full_name=applicant.full_name
-    )
+# расшифровываем токен и получаем email
+def decode_token(token: str) -> str:
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    return payload.get("sub")

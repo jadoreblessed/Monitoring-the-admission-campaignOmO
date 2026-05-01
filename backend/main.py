@@ -1,22 +1,24 @@
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.routers import applications, programs, applicants, dashboard, export, seed
 from app.routers import applicants, programs, applications, dashboard, export, seed, auth, cabinet
-Base.metadata.create_all(bind=engine) #Создаем все таблицы в базе данных
-#создаем приложение
-app = FastAPI( 
-    title = "Мониторинг приемной комании",
-    description = "API для отслеживания заявок, зачислений и конверсии",
-    version = "1.0.0"
+
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(
+    title="Мониторинг приемной кампании",
+    description="API для отслеживания заявок, зачислений и конверсии",
+    version="1.0.0"
 )
 
-#разрешаем запросы с фронтенда
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials = True,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
