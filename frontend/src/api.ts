@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = axios.create({ baseURL: "http://127.0.0.1:8000" });
+const API = axios.create({ baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:8000" });
 
 // метрики дашборда
 export const fetchMetrics = () => API.get("/dashboard/");
@@ -14,5 +14,5 @@ export const fetchApplications = (params: Record<string, string>) =>
 
 // экспорт CSV
 export const exportCSV = () => {
-  window.open("http://127.0.0.1:8000/export/raw", "_blank");
+  window.open(`${import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"}/export/raw`, "_blank");
 };
