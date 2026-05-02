@@ -14,5 +14,5 @@ export const fetchApplications = (params: Record<string, string> = {}) =>
 
 // экспорт CSV
 export const exportCSV = () => {
-  window.open(`${import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"}/export/raw`, "_blank");
+  window.location.href = `${import.meta.env.VITE_API_URL ?? "http://111.88.250.70:8000"}/export/raw`;
 };
