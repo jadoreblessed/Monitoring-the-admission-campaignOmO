@@ -3,6 +3,14 @@ import { fetchMetrics, fetchByProgram, fetchApplications, exportCSV } from "./ap
 import Cabinet from "./Cabinet";
 import "./App.css";
 
+const statusLabel: Record<string, string> = {
+  new: "Новая", review: "Рассмотрение", enrolled: "Зачислен", rejected: "Отклонён",
+};
+
+const sourceLabel: Record<string, string> = {
+  site: "Сайт", olymp: "Олимпиада", aggregator: "Агрегатор", other: "Другое",
+};
+
 function App() {
   const [mode, setMode] = useState<"dashboard" | "cabinet">("dashboard");
   const [metrics, setMetrics] = useState<any>(null);
@@ -24,41 +32,39 @@ function App() {
     fetchApplications(params).then((r) => setApplications(r.data));
   };
 
-  const statusText: Record<string, string> = {
-    new: "Новая", review: "Рассмотрение", enrolled: "Зачислен", rejected: "Отклонён"
-  };
+  if (mode === "cabinet") {
+    return <Cabinet onBack={() => setMode("dashboard")} />;
+  }
 
-  const sourceText: Record<string, string> = {
-    site: "Сайт", olymp: "Олимпиада", aggregator: "Агрегатор", other: "Другое"
-  };
-
-  if (mode === "cabinet") return <Cabinet onBack={() => setMode("dashboard")} />;
-
-  const convPct = metrics ? metrics.conversion_rate : 0;
+  const convPct = metrics?.conversion_rate ?? 0;
   const ringDash = (convPct / 100) * 220;
 
   return (
     <div className="app">
+      {/* Шапка */}
       <nav className="topbar">
         <div className="topbar-left">
-          <div className="logo">М</div>
+          <div className="logo">МПК</div>
           <div className="topbar-info">
             <span className="topbar-title">Мониторинг Приёмной Кампании</span>
-            <span className="topbar-sub">РТУ МИРЭА · 2025</span>
+            <span className="topbar-sub">РТУ МИРЭА · 2026</span>
           </div>
         </div>
-        <button className="btn-lk" onClick={() => setMode("cabinet")}>Личный кабинет</button>
+        <button className="btn-lk" onClick={() => setMode("cabinet")}>
+          Личный кабинет
+        </button>
       </nav>
 
       <main className="content">
-        <h2 className="content-title">Обзор приёмной кампании</h2>
+        <h2 className="content-title">Обзор кампании</h2>
 
+        {/* Метрики */}
         {metrics && (
           <div className="top-row">
             <div className="card card-ring">
               <svg className="ring" viewBox="0 0 90 90">
-                <circle cx="45" cy="45" r="35" fill="none" stroke="#eaecf5" strokeWidth="7" />
-                <circle cx="45" cy="45" r="35" fill="none" stroke="#5570f1" strokeWidth="7"
+                <circle cx="45" cy="45" r="35" fill="none" stroke="#252a38" strokeWidth="7" />
+                <circle cx="45" cy="45" r="35" fill="none" stroke="#4f7ef8" strokeWidth="7"
                   strokeDasharray={`${ringDash} 220`} strokeLinecap="round"
                   transform="rotate(-90 45 45)" />
               </svg>
@@ -87,9 +93,13 @@ function App() {
           </div>
         )}
 
+        {/* Две колонки */}
         <div className="two-col">
+          {/* Программы */}
           <div className="panel">
-            <h3 className="panel-title">Конверсия по программам</h3>
+            <div className="panel-head-row">
+              <span className="panel-title">Конверсия по программам</span>
+            </div>
             <div className="prog-list">
               {programs.map((p) => (
                 <div className="prog" key={p.program_id}>
@@ -111,62 +121,44 @@ function App() {
             </div>
           </div>
 
+          {/* Статусы */}
           <div className="panel">
-            <h3 className="panel-title">Распределение по статусам</h3>
+            <div className="panel-head-row">
+              <span className="panel-title">Распределение по статусам</span>
+            </div>
             {metrics && (
               <div className="status-bars">
-                <div className="sbar">
-                  <div className="sbar-head">
-                    <span className="sbar-dot blue" />
-                    <span>Новые</span>
-                    <span className="sbar-val">{metrics.new}</span>
+                {[
+                  { key: "new",      label: "Новые",           val: metrics.new,          cls: "blue"   },
+                  { key: "review",   label: "На рассмотрении", val: metrics.in_review,    cls: "orange" },
+                  { key: "enrolled", label: "Зачислены",       val: metrics.enrolled,     cls: "green"  },
+                  { key: "rejected", label: "Отклонены",       val: metrics.rejected,     cls: "red"    },
+                ].map(({ key, label, val, cls }) => (
+                  <div className="sbar" key={key}>
+                    <div className="sbar-head">
+                      <span className={`sbar-dot ${cls}`} />
+                      <span>{label}</span>
+                      <span className="sbar-val">{val}</span>
+                    </div>
+                    <div className="sbar-bg">
+                      <div
+                        className={`sbar-fill ${cls}-bg`}
+                        style={{ width: metrics.total_applications
+                          ? `${(val / metrics.total_applications) * 100}%`
+                          : "0%" }}
+                      />
+                    </div>
                   </div>
-                  <div className="sbar-bg">
-                    <div className="sbar-fill blue-bg"
-                      style={{ width: `${(metrics.new / metrics.total_applications) * 100}%` }} />
-                  </div>
-                </div>
-                <div className="sbar">
-                  <div className="sbar-head">
-                    <span className="sbar-dot orange" />
-                    <span>На рассмотрении</span>
-                    <span className="sbar-val">{metrics.in_review}</span>
-                  </div>
-                  <div className="sbar-bg">
-                    <div className="sbar-fill orange-bg"
-                      style={{ width: `${(metrics.in_review / metrics.total_applications) * 100}%` }} />
-                  </div>
-                </div>
-                <div className="sbar">
-                  <div className="sbar-head">
-                    <span className="sbar-dot green" />
-                    <span>Зачислены</span>
-                    <span className="sbar-val">{metrics.enrolled}</span>
-                  </div>
-                  <div className="sbar-bg">
-                    <div className="sbar-fill green-bg"
-                      style={{ width: `${(metrics.enrolled / metrics.total_applications) * 100}%` }} />
-                  </div>
-                </div>
-                <div className="sbar">
-                  <div className="sbar-head">
-                    <span className="sbar-dot red" />
-                    <span>Отклонены</span>
-                    <span className="sbar-val">{metrics.rejected}</span>
-                  </div>
-                  <div className="sbar-bg">
-                    <div className="sbar-fill red-bg"
-                      style={{ width: `${(metrics.rejected / metrics.total_applications) * 100}%` }} />
-                  </div>
-                </div>
+                ))}
               </div>
             )}
           </div>
         </div>
 
+        {/* Таблица заявок */}
         <div className="panel">
           <div className="panel-head-row">
-            <h3 className="panel-title">Все заявки</h3>
+            <span className="panel-title">Заявки</span>
             <div className="panel-controls">
               <select value={statusFilter} onChange={(e) => handleFilter(e.target.value)}>
                 <option value="">Все статусы</option>
@@ -175,7 +167,7 @@ function App() {
                 <option value="enrolled">Зачислены</option>
                 <option value="rejected">Отклонены</option>
               </select>
-              <button className="btn-export" onClick={exportCSV}>Экспорт CSV</button>
+              <button className="btn-export" onClick={exportCSV}>Экспорт</button>
             </div>
           </div>
           <div className="table-scroll">
@@ -186,7 +178,7 @@ function App() {
                   <th>Абитуриент</th>
                   <th>Программа</th>
                   <th>Статус</th>
-                  <th>Баллы ЕГЭ</th>
+                  <th>Баллы</th>
                   <th>Волна</th>
                   <th>Источник</th>
                 </tr>
@@ -194,13 +186,19 @@ function App() {
               <tbody>
                 {applications.slice(0, 50).map((a) => (
                   <tr key={a.id}>
-                    <td>{a.id}</td>
+                    <td className="td-mono">{a.id}</td>
                     <td>{a.applicant_id}</td>
                     <td>{a.program_id}</td>
-                    <td><span className={`tag tag-${a.status}`}>{statusText[a.status] || a.status}</span></td>
-                    <td>{a.score}</td>
-                    <td>{a.wave}</td>
-                    <td>{sourceText[a.source] || a.source}</td>
+                    <td>
+                      <span className={`tag tag-${a.status}`}>
+                        {statusLabel[a.status] || a.status}
+                      </span>
+                    </td>
+                    <td className="td-mono">{a.score}</td>
+                    <td className="td-mono">{a.wave}</td>
+                    <td style={{ color: "var(--text2)", fontSize: "12px" }}>
+                      {sourceLabel[a.source] || a.source}
+                    </td>
                   </tr>
                 ))}
               </tbody>
