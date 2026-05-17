@@ -30,9 +30,12 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   font-size: 14px;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
-.app { min-height: 100vh; display: flex; flex-direction: column; }
+.app { min-height: 100vh; display: flex; flex-direction: column; width: 100%; }
 
 /* ===== TOPBAR ===== */
 .topbar {
@@ -109,7 +112,7 @@ body {
 .content {
   max-width: 100%;
   margin: 0;
-  padding: 24px 20px;
+  padding: 24px 28px;
   flex: 1;
   width: 100%;
 }
@@ -169,13 +172,13 @@ body {
 
 .line-chart {
   width: 100%;
-  height: 80px;
+  height: 140px;
   display: block;
 }
 
 /* Donut */
 .donut-wrap { display: flex; align-items: center; gap: 8px; padding: 4px 12px 12px; }
-.donut-svg  { width: 140px; height: 120px; flex-shrink: 0; }
+.donut-svg  { width: 180px; height: 160px; flex-shrink: 0; }
 .donut-empty { padding: 20px; color: var(--text3); font-size: 12px; }
 
 .donut-legend { display: flex; flex-direction: column; gap: 6px; }
