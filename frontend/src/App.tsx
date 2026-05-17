@@ -13,7 +13,7 @@ const sourceLabel: Record<string, string> = {
 function MiniLineChart({ data }: { data: { date: string; count: number }[] }) {
   if (!data.length) return null;
   const max = Math.max(...data.map(d => d.count), 1);
-  const W = 300, H = 80, pad = 8;
+  const W = 300, H = 100, pad = 10;
   const points = data.map((d, i) => {
     const x = pad + (i / (data.length - 1)) * (W - pad * 2);
     const y = H - pad - ((d.count / max) * (H - pad * 2));
@@ -38,7 +38,7 @@ function MiniLineChart({ data }: { data: { date: string; count: number }[] }) {
       {data.filter((_, i) => i % Math.ceil(data.length / 5) === 0 || i === data.length - 1).map((d, _, arr) => {
         const origI = data.indexOf(d);
         const x = pad + (origI / (data.length - 1)) * (W - pad * 2);
-        return <text key={origI} x={x} y={H} textAnchor="middle" fontSize="8" fill="#464f66">{d.date}</text>;
+        return <text key={origI} x={x} y={H + 2} textAnchor="middle" fontSize="8" fill="#464f66">{d.date}</text>;
       })}
     </svg>
   );
