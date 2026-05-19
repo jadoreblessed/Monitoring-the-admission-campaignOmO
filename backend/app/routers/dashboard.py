@@ -33,6 +33,8 @@ def get_metrics(
 
     # конверсия = зачислено / всего * 100
     conversion = round((enrolled / total * 100), 2) if total > 0 else 0
+    # расчет среднего балла ЕГЭ
+    avg_score = round(db.query(func.avg(Application.score)).scalar() or 0, 2)
 
     return {
         "total_applications": total,
@@ -40,7 +42,8 @@ def get_metrics(
         "rejected": rejected,
         "in_review": in_review,
         "new": new,
-        "conversion_rate": conversion
+        "conversion_rate": conversion,
+        "avg_score": avg_score
     }
 
 # конверсия в разрезе программ — для графика на дашборде

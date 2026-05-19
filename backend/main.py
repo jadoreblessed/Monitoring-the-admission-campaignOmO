@@ -29,7 +29,7 @@ app.include_router(applications.router)
 app.include_router(dashboard.router)
 app.include_router(export.router)
 app.include_router(seed.router)
-app.include_router(auth.router)
+#app.include_router(auth.router)
 app.include_router(cabinet.router)
 
 #Главная страница

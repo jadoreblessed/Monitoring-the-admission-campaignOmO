@@ -6,7 +6,7 @@ SECRET_KEY = "admission-monitoring-secret-key-2026"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 часа
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 # хешируем пароль перед сохранением в БД
 def hash_password(password: str) -> str:
