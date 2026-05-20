@@ -168,36 +168,51 @@
 
 ## Локальный запуск (для разработки)
 
+### Требования
+- Python 3.10+
+- Node.js 18+
+- PostgreSQL 14+
+
+### 1. Клонировать репозиторий
 ```bash
-# 1. Клонировать репозиторий
 git clone https://gitverse.ru/jadoreblessed/Monitoring-the-admission-campaignOmO.git
 cd Monitoring-the-admission-campaignOmO
-
-# 2. Backend
 cd backend
+
+# Создать виртуальное окружение
 python -m venv venv
-source venv/bin/activate          # Linux/Mac
-venv\Scripts\activate             # Windows
-pip install fastapi uvicorn sqlalchemy psycopg2-binary "pydantic[email]" \
-    python-dotenv passlib bcrypt==4.0.1 python-jose openpyxl pytest httpx
+source venv/bin/activate      # Linux/macOS
+venv\Scripts\activate         # Windows
 
-# Создать backend/.env:
-# DATABASE_URL=postgresql://postgres:postgres@localhost:5432/admission_db
-# SECRET_KEY=your-secret-key
-# FRONTEND_URL=http://localhost:5173
+# Установить зависимости
+pip install fastapi uvicorn psycopg2-binary sqlalchemy python-dotenv passlib[bcrypt] python-jose[cryptography] pandas openpyxl pytest
 
-uvicorn main:app --reload         # http://127.0.0.1:8000/docs
+# Создать .env файл
+cat > .env << EOF
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/admission_db
+SECRET_KEY=admission-monitoring-secret-key-2026
+ALGORITHM=HS256
+EOF
 
-# 3. Frontend (в отдельном терминале)
+# Создать базу данных PostgreSQL
+psql -U postgres -c "CREATE DATABASE admission_db;"
+
+# Запустить сервер
+uvicorn main:app --reload --port 8000
+# Открыть новый терминал
 cd frontend
+
+# Установить зависимости
 npm install
 
-# Создать frontend/.env:
-# VITE_API_URL=http://127.0.0.1:8000
+# Создать .env файл
+echo "VITE_API_URL=http://localhost:8000" > .env
 
-npm run dev                       # http://127.0.0.1:5173
-
-# 4. Запуск тестов
+# Запустить
+npm run dev
+cd backend
+source venv/bin/activate
+python -c "from app.routers import seed; seed.generate_synthetic_data()"
 cd backend
 source venv/bin/activate
 pytest test_main.py -v

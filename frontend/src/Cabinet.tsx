@@ -36,6 +36,12 @@ export default function Cabinet({ onBack }: CabinetProps) {
   // детали заявки
   const [selectedApp, setSelectedApp] = useState<any>(null);
 
+  // редактирование профиля
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editFullName, setEditFullName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editRegion, setEditRegion] = useState("");
+
   const headers = { Authorization: `Bearer ${token}` };
 
   const loadData = async () => {
@@ -48,7 +54,7 @@ export default function Cabinet({ onBack }: CabinetProps) {
       setMyApps(appsRes.data);
       setPrograms(progsRes.data);
       setUser(profileRes.data);
-    } catch {
+    } catch (err) {
       setError("Ошибка загрузки данных");
     }
   };
@@ -60,7 +66,7 @@ export default function Cabinet({ onBack }: CabinetProps) {
   const handleLogin = async () => {
     setError("");
     try {
-      const res = await API.post("/auth/login", { email: loginEmail, password: loginPass });
+      const res = await API.post("/cabinet/auth/login", { email: loginEmail, password: loginPass });
       setToken(res.data.access_token);
       setUser({ full_name: res.data.full_name, id: res.data.applicant_id });
       setPage("dashboard");
@@ -72,7 +78,7 @@ export default function Cabinet({ onBack }: CabinetProps) {
   const handleRegister = async () => {
     setError("");
     try {
-      const res = await API.post("/auth/register", {
+      const res = await API.post("/cabinet/auth/register", {
         full_name: regName,
         email: regEmail,
         phone: regPhone || undefined,
@@ -104,9 +110,46 @@ export default function Cabinet({ onBack }: CabinetProps) {
       );
       setApplyMsg("Заявка подана!");
       loadData();
+      setApplyProgram(0);
+      setApplyScore("");
     } catch (e: any) {
       setError(e.response?.data?.detail || "Ошибка подачи заявки");
     }
+  };
+
+  const handleCancelApplication = async (appId: number) => {
+    if (!confirm("Вы уверены, что хотите отменить заявку?")) return;
+    setError("");
+    try {
+      await API.delete(`/cabinet/application/${appId}`, { headers });
+      loadData();
+      if (selectedApp?.id === appId) setSelectedApp(null);
+    } catch (e: any) {
+      setError(e.response?.data?.detail || "Ошибка отмены заявки");
+    }
+  };
+
+  const handleUpdateProfile = async () => {
+    setError("");
+    try {
+      const updates: any = {};
+      if (editFullName && editFullName !== user?.full_name) updates.full_name = editFullName;
+      if (editPhone !== user?.phone) updates.phone = editPhone || null;
+      if (editRegion !== user?.region) updates.region = editRegion || null;
+      
+      await API.put("/cabinet/profile", updates, { headers });
+      await loadData();
+      setEditingProfile(false);
+    } catch (e: any) {
+      setError(e.response?.data?.detail || "Ошибка обновления профиля");
+    }
+  };
+
+  const startEditingProfile = () => {
+    setEditFullName(user?.full_name || "");
+    setEditPhone(user?.phone || "");
+    setEditRegion(user?.region || "");
+    setEditingProfile(true);
   };
 
   const loadAppDetail = async (appId: number) => {
@@ -120,7 +163,7 @@ export default function Cabinet({ onBack }: CabinetProps) {
 
   const programName = (id: number) => programs.find((p) => p.id === id)?.name || `#${id}`;
 
-  // === СТРАНИЦА ВХОДА ===
+  // СТРАНИЦА ВХОДА
   if (page === "login") {
     return (
       <div className="container">
@@ -137,13 +180,12 @@ export default function Cabinet({ onBack }: CabinetProps) {
           <p className="auth-switch" onClick={() => { setPage("register"); setError(""); }}>
             Нет аккаунта? Регистрация
           </p>
-          <p className="auth-hint">Тестовый вход: email любого абитуриента из базы, пароль: password123</p>
         </div>
       </div>
     );
   }
 
-  // === СТРАНИЦА РЕГИСТРАЦИИ ===
+  // СТРАНИЦА РЕГИСТРАЦИИ
   if (page === "register") {
     return (
       <div className="container">
@@ -168,7 +210,7 @@ export default function Cabinet({ onBack }: CabinetProps) {
     );
   }
 
-  // === ЛИЧНЫЙ КАБИНЕТ ===
+  // ЛИЧНЫЙ КАБИНЕТ
   return (
     <div className="container">
       <div className="header-bar">
@@ -183,12 +225,32 @@ export default function Cabinet({ onBack }: CabinetProps) {
 
       {error && <div className="error-msg">{error}</div>}
 
-      {/* Мои заявки */}
+      {/* ПРОФИЛЬ */}
+      <h2>Мой профиль</h2>
+      {!editingProfile ? (
+        <div className="profile-info">
+          <div><strong>ФИО:</strong> {user?.full_name}</div>
+          <div><strong>Email:</strong> {user?.email}</div>
+          <div><strong>Телефон:</strong> {user?.phone || "не указан"}</div>
+          <div><strong>Регион:</strong> {user?.region || "не указан"}</div>
+          <button className="btn-small" onClick={startEditingProfile}>Редактировать профиль</button>
+        </div>
+      ) : (
+        <div className="profile-edit">
+          <input value={editFullName} onChange={(e) => setEditFullName(e.target.value)} placeholder="ФИО" />
+          <input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Телефон (+7XXXXXXXXXX)" />
+          <input value={editRegion} onChange={(e) => setEditRegion(e.target.value)} placeholder="Регион" />
+          <button className="btn-primary" onClick={handleUpdateProfile}>Сохранить</button>
+          <button className="btn-back" onClick={() => setEditingProfile(false)}>Отмена</button>
+        </div>
+      )}
+
+      {/* МОИ ЗАЯВКИ */}
       <h2>Мои заявки ({myApps.length})</h2>
       {myApps.length === 0 ? (
         <p>У вас пока нет заявок. Подайте первую заявку ниже.</p>
       ) : (
-        <table>
+        <table className="applications-table">
           <thead>
             <tr>
               <th>Программа</th>
@@ -207,14 +269,21 @@ export default function Cabinet({ onBack }: CabinetProps) {
                 <td>{a.wave}</td>
                 <td><span className={`badge badge-${a.status}`}>{a.status}</span></td>
                 <td>{new Date(a.created_at).toLocaleDateString("ru-RU")}</td>
-                <td><button className="btn-small" onClick={() => loadAppDetail(a.id)}>Подробнее</button></td>
+                <td>
+                  <button className="btn-small" onClick={() => loadAppDetail(a.id)}>Подробнее</button>
+                  {a.status !== "enrolled" && a.status !== "rejected" && (
+                    <button className="btn-small btn-danger" onClick={() => handleCancelApplication(a.id)} style={{ marginLeft: "8px" }}>
+                      Отменить
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
 
-      {/* Детали заявки */}
+      {/* ДЕТАЛИ ЗАЯВКИ */}
       {selectedApp && (
         <div className="app-detail">
           <h3>Заявка: {selectedApp.program} ({selectedApp.faculty})</h3>
@@ -240,7 +309,7 @@ export default function Cabinet({ onBack }: CabinetProps) {
         </div>
       )}
 
-      {/* Подать заявку */}
+      {/* ПОДАТЬ ЗАЯВКУ */}
       <h2>Подать заявку</h2>
       <div className="apply-form">
         {applyMsg && <div className="success-msg">{applyMsg}</div>}
