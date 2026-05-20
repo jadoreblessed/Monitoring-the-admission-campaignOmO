@@ -15,9 +15,9 @@ def create_applicant(data: ApplicantCreate, db: Session = Depends(get_db)):
     if exists:
         raise HTTPException(status_code=400, detail="Email уже существует")
     applicant = Applicant(**data.model_dump())
-    db.add(Applicant)
-    db.commit
-    db.refresh(Applicant)
+    db.add(applicant)
+    db.commit()
+    db.refresh(applicant)
     return applicant
 
 # READ - получить всех аббитуриентов

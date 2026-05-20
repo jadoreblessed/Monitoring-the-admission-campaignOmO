@@ -36,14 +36,15 @@ class Application(Base):
     __tablename__ = "applications"
 
     id = Column(Integer, primary_key=True, index=True)
-    applicant_id = Column(Integer, ForeignKey("applicants.id"), nullable=False)  # кто подал
-    program_id = Column(Integer, ForeignKey("programs.id"), nullable=False)  # куда подал
-    status = Column(String, default="new")  # статус: new, review, enrolled, rejected
-    source = Column(String, default="site")  # откуда пришёл: site, olymp, aggregator, other
-    wave = Column(Integer, default=1)  # волна приёма: 1 или 2
-    score = Column(Float)  # баллы ЕГЭ
-    created_at = Column(DateTime, default=datetime.utcnow)  # дата подачи
-    status_changed_at = Column(DateTime, default=datetime.utcnow)  # дата смены статуса
+    applicant_id = Column(Integer, ForeignKey("applicants.id"), nullable=False)
+    program_id = Column(Integer, ForeignKey("programs.id"), nullable=False)
+    status = Column(String, default="new")
+    source = Column(String, default="site")
+    wave = Column(Integer, default=1)
+    score = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    status_changed_at = Column(DateTime, default=datetime.utcnow)
+    has_original = Column(Integer, default=0)  # 1 = подал оригинал, 0 = нет
 
     applicant = relationship("Applicant", back_populates="applications")
     program = relationship("Program", back_populates="applications")

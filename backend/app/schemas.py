@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -51,9 +51,20 @@ VALID_SOURCES = ["site", "olymp", "aggregator", "other"]
 class ApplicationCreate(BaseModel):
     applicant_id: int
     program_id: int
-    source: str = Field(default="site")  # откуда пришёл
-    wave: int = Field(ge=1, le=2)  # волна 1 или 2
-    score: Optional[float] = Field(None, ge=0, le=310)  # баллы ЕГЭ от 0 до 310
+    source: str = Field(default="site")
+    wave: int = Field(ge=1, le=2)
+    score: Optional[float] = Field(None, ge=0, le=310)
+    has_original: int = Field(default=0, ge=0, le=1)  # 0 или 1
+
+    @field_validator('score')
+    @classmethod
+    def validate_ege_score(cls, v):
+        if v is None:
+            return v
+        # Максимум: 3 предмета по 100 баллов + 10 ИД = 310
+        if v < 0 or v > 310:
+            raise ValueError('Балл ЕГЭ должен быть суммой трёх предметов (0-300) + ИД (0-10), итого от 0 до 310')
+        return v
 
 class ApplicationRead(BaseModel):
     id: int
@@ -65,6 +76,7 @@ class ApplicationRead(BaseModel):
     score: Optional[float]
     created_at: datetime
     status_changed_at: datetime
+    has_original: int  # 1 = подал оригинал, 0 = не подал
 
     class Config:
         from_attributes = True
