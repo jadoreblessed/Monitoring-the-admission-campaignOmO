@@ -15,9 +15,9 @@ def create_applicant(data: ApplicantCreate, db: Session = Depends(get_db)):
     if exists:
         raise HTTPException(status_code=400, detail="Email уже существует")
     applicant = Applicant(**data.model_dump())
-    db.add(Applicant)
-    db.commit
-    db.refresh(Applicant)
+    db.add(applicant)
+    db.commit()
+    db.refresh(applicant)
     return applicant
 
 # READ - получить всех аббитуриентов
@@ -37,3 +37,20 @@ def delete_applicant(applicant_id: int, db: Session = Depends(get_db)):
     db.delete(applicant)
     db.commit()
     return {"detail": "Абитуриент удалён"}
+    # GET /me — личный кабинет абитуриента (по email)
+@router.get("/me/applications")
+def get_me(email: str, db: Session = Depends(get_db)):
+    # ищем абитуриента по email
+    applicant = db.query(Applicant).filter(Applicant.email == email).first()
+    if not applicant:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    # получаем его заявки
+    from app.models import Application
+    applications = db.query(Application).filter(Application.applicant_id == applicant.id).all()
+
+    return {
+        "applicant": applicant.full_name,
+        "email": applicant.email,
+        "applications": applications
+    }

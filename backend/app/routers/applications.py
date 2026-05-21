@@ -80,9 +80,18 @@ def update_status(application_id: int, data: StatusUpdate, db: Session = Depends
     if data.new_status not in VALID_STATUSES:
         raise HTTPException(status_code=400, detail=f"Статус должен быть один из: {VALID_STATUSES}")
 
-    # проверяем что статус реально меняется
+# проверяем что статус реально меняется
     if application.status == data.new_status:
         raise HTTPException(status_code=400, detail="Заявка уже в этом статусе")
+
+    # ЗАДАЧА: Валидация переходов
+    # Нельзя менять статус из "rejected" вообще ни на что
+    if application.status == "rejected":
+        raise HTTPException(status_code=400, detail="Нельзя изменить статус отклоненной заявки")
+
+    # Нельзя менять статус из "enrolled" вообще ни на что
+    if application.status == "enrolled":
+        raise HTTPException(status_code=400, detail="Заявка уже зачислена, менять статус нельзя")
 
     # записываем смену в журнал
     log = StatusLog(
@@ -94,6 +103,7 @@ def update_status(application_id: int, data: StatusUpdate, db: Session = Depends
 
     # обновляем статус заявки
     application.status = data.new_status
+    print(f"📧 Уведомление: заявка #{application.id} — статус изменён на '{data.new_status}' (абитуриент ID: {application.applicant_id})")
     application.status_changed_at = datetime.utcnow()
     db.commit()
     db.refresh(application)
