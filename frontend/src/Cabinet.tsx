@@ -14,6 +14,7 @@ export default function Cabinet({ onBack }: CabinetProps) {
   const [myApps, setMyApps] = useState<any[]>([]);
   const [programs, setPrograms] = useState<any[]>([]);
   const [error, setError] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   // форма входа
   const [loginEmail, setLoginEmail] = useState("");
@@ -35,6 +36,7 @@ export default function Cabinet({ onBack }: CabinetProps) {
 
   // детали заявки
   const [selectedApp, setSelectedApp] = useState<any>(null);
+  const [animateStatus, setAnimateStatus] = useState<number | null>(null);
 
   // редактирование профиля
   const [editingProfile, setEditingProfile] = useState(false);
@@ -43,6 +45,17 @@ export default function Cabinet({ onBack }: CabinetProps) {
   const [editRegion, setEditRegion] = useState("");
 
   const headers = { Authorization: `Bearer ${token}` };
+
+  // Получение первой буквы для аватарки
+  const getAvatarLetter = () => {
+    return user?.full_name?.charAt(0)?.toUpperCase() || "?";
+  };
+
+  // Статус заявки для прогресс-бара
+  const getStatusStep = (status: string) => {
+    const steps = ["new", "review", "enrolled", "rejected"];
+    return steps.indexOf(status);
+  };
 
   const loadData = async () => {
     try {
@@ -109,6 +122,7 @@ export default function Cabinet({ onBack }: CabinetProps) {
         { headers }
       );
       setApplyMsg("Заявка подана!");
+      setShowModal(false);
       loadData();
       setApplyProgram(0);
       setApplyScore("");
@@ -122,6 +136,8 @@ export default function Cabinet({ onBack }: CabinetProps) {
     setError("");
     try {
       await API.delete(`/cabinet/application/${appId}`, { headers });
+      setAnimateStatus(appId);
+      setTimeout(() => setAnimateStatus(null), 500);
       loadData();
       if (selectedApp?.id === appId) setSelectedApp(null);
     } catch (e: any) {
@@ -163,15 +179,35 @@ export default function Cabinet({ onBack }: CabinetProps) {
 
   const programName = (id: number) => programs.find((p) => p.id === id)?.name || `#${id}`;
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "new": return "#ffc107";
+      case "review": return "#17a2b8";
+      case "enrolled": return "#28a745";
+      case "rejected": return "#dc3545";
+      default: return "#6c757d";
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "new": return "Новая";
+      case "review": return "На рассмотрении";
+      case "enrolled": return "Зачислен";
+      case "rejected": return "Отклонён";
+      default: return status;
+    }
+  };
+
   // СТРАНИЦА ВХОДА
   if (page === "login") {
     return (
-      <div className="container">
-        <div className="header-bar">
-          <h1>Личный кабинет абитуриента</h1>
-          <button className="btn-back" onClick={onBack}>← Дашборд комиссии</button>
+      <div className="cabinet-container">
+        <div className="cabinet-header">
+          <h1>🎓 Личный кабинет абитуриента</h1>
+          <button className="btn-back-large" onClick={onBack}>← Дашборд комиссии</button>
         </div>
-        <div className="auth-form">
+        <div className="auth-card">
           <h2>Вход</h2>
           {error && <div className="error-msg">{error}</div>}
           <input type="email" placeholder="Email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
@@ -188,12 +224,12 @@ export default function Cabinet({ onBack }: CabinetProps) {
   // СТРАНИЦА РЕГИСТРАЦИИ
   if (page === "register") {
     return (
-      <div className="container">
-        <div className="header-bar">
-          <h1>Личный кабинет абитуриента</h1>
-          <button className="btn-back" onClick={onBack}>← Дашборд комиссии</button>
+      <div className="cabinet-container">
+        <div className="cabinet-header">
+          <h1>🎓 Личный кабинет абитуриента</h1>
+          <button className="btn-back-large" onClick={onBack}>← Дашборд комиссии</button>
         </div>
-        <div className="auth-form">
+        <div className="auth-card">
           <h2>Регистрация</h2>
           {error && <div className="error-msg">{error}</div>}
           <input placeholder="ФИО" value={regName} onChange={(e) => setRegName(e.target.value)} />
@@ -212,128 +248,149 @@ export default function Cabinet({ onBack }: CabinetProps) {
 
   // ЛИЧНЫЙ КАБИНЕТ
   return (
-    <div className="container">
-      <div className="header-bar">
-        <h1>Личный кабинет: {user?.full_name}</h1>
-        <div>
-          <button className="btn-back" onClick={onBack}>← Дашборд комиссии</button>
+    <div className="cabinet-container">
+      {/* Модальное окно подачи заявки */}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>📝 Подать заявку</h3>
+            <div className="modal-form">
+              <select value={applyProgram} onChange={(e) => setApplyProgram(Number(e.target.value))}>
+                <option value={0}>Выберите программу</option>
+                {programs.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name} ({p.faculty})</option>
+                ))}
+              </select>
+              <input type="number" placeholder="Сумма баллов ЕГЭ" value={applyScore} onChange={(e) => setApplyScore(e.target.value)} />
+              <select value={applyWave} onChange={(e) => setApplyWave(Number(e.target.value))}>
+                <option value={1}>1 волна</option>
+                <option value={2}>2 волна</option>
+              </select>
+              <select value={applySource} onChange={(e) => setApplySource(e.target.value)}>
+                <option value="site">Сайт</option>
+                <option value="olymp">Олимпиада</option>
+                <option value="aggregator">Агрегатор</option>
+                <option value="other">Другое</option>
+              </select>
+              <div className="modal-buttons">
+                <button className="btn-primary" onClick={handleApply} disabled={!applyProgram || !applyScore}>
+                  Отправить
+                </button>
+                <button className="btn-secondary" onClick={() => setShowModal(false)}>Отмена</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Шапка */}
+      <div className="cabinet-header">
+        <div className="header-left">
+          <div className="avatar">{getAvatarLetter()}</div>
+          <div>
+            <h1>Привет, {user?.full_name?.split(" ")[0]}!</h1>
+            <p className="user-email">{user?.email}</p>
+          </div>
+        </div>
+        <div className="header-right">
+          <button className="btn-apply" onClick={() => setShowModal(true)}>+ Подать заявку</button>
           <button className="btn-logout" onClick={() => { setToken(""); setPage("login"); setUser(null); }}>
             Выйти
           </button>
+          <button className="btn-back" onClick={onBack}>← Дашборд</button>
         </div>
       </div>
 
       {error && <div className="error-msg">{error}</div>}
 
-      {/* ПРОФИЛЬ */}
-      <h2>Мой профиль</h2>
-      {!editingProfile ? (
-        <div className="profile-info">
-          <div><strong>ФИО:</strong> {user?.full_name}</div>
-          <div><strong>Email:</strong> {user?.email}</div>
-          <div><strong>Телефон:</strong> {user?.phone || "не указан"}</div>
-          <div><strong>Регион:</strong> {user?.region || "не указан"}</div>
-          <button className="btn-small" onClick={startEditingProfile}>Редактировать профиль</button>
-        </div>
-      ) : (
-        <div className="profile-edit">
-          <input value={editFullName} onChange={(e) => setEditFullName(e.target.value)} placeholder="ФИО" />
-          <input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Телефон (+7XXXXXXXXXX)" />
-          <input value={editRegion} onChange={(e) => setEditRegion(e.target.value)} placeholder="Регион" />
-          <button className="btn-primary" onClick={handleUpdateProfile}>Сохранить</button>
-          <button className="btn-back" onClick={() => setEditingProfile(false)}>Отмена</button>
-        </div>
-      )}
-
-      {/* МОИ ЗАЯВКИ */}
-      <h2>Мои заявки ({myApps.length})</h2>
-      {myApps.length === 0 ? (
-        <p>У вас пока нет заявок. Подайте первую заявку ниже.</p>
-      ) : (
-        <table className="applications-table">
-          <thead>
-            <tr>
-              <th>Программа</th>
-              <th>Баллы</th>
-              <th>Волна</th>
-              <th>Статус</th>
-              <th>Дата подачи</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {myApps.map((a) => (
-              <tr key={a.id}>
-                <td>{programName(a.program_id)}</td>
-                <td>{a.score}</td>
-                <td>{a.wave}</td>
-                <td><span className={`badge badge-${a.status}`}>{a.status}</span></td>
-                <td>{new Date(a.created_at).toLocaleDateString("ru-RU")}</td>
-                <td>
-                  <button className="btn-small" onClick={() => loadAppDetail(a.id)}>Подробнее</button>
-                  {a.status !== "enrolled" && a.status !== "rejected" && (
-                    <button className="btn-small btn-danger" onClick={() => handleCancelApplication(a.id)} style={{ marginLeft: "8px" }}>
-                      Отменить
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      {/* ДЕТАЛИ ЗАЯВКИ */}
-      {selectedApp && (
-        <div className="app-detail">
-          <h3>Заявка: {selectedApp.program} ({selectedApp.faculty})</h3>
-          <div className="detail-grid">
-            <div><strong>Статус:</strong> <span className={`badge badge-${selectedApp.status}`}>{selectedApp.status}</span></div>
-            <div><strong>Баллы ЕГЭ:</strong> {selectedApp.score}</div>
-            <div><strong>Волна:</strong> {selectedApp.wave}</div>
-            <div><strong>Источник:</strong> {selectedApp.source}</div>
+      {/* Профиль */}
+      <div className="profile-section">
+        <h2>📋 Мой профиль</h2>
+        {!editingProfile ? (
+          <div className="profile-card">
+            <div className="profile-row"><strong>ФИО:</strong> {user?.full_name}</div>
+            <div className="profile-row"><strong>Телефон:</strong> {user?.phone || "не указан"}</div>
+            <div className="profile-row"><strong>Регион:</strong> {user?.region || "не указан"}</div>
+            <button className="btn-edit" onClick={startEditingProfile}>✏ Редактировать</button>
           </div>
-          <h4>История статусов:</h4>
-          <div className="status-timeline">
-            {selectedApp.history.map((h: any, i: number) => (
-              <div key={i} className="timeline-item">
-                <div className={`timeline-dot dot-${h.new_status}`}></div>
-                <div>
-                  <strong>{h.old_status || "—"} → {h.new_status}</strong>
-                  <div className="timeline-date">{new Date(h.changed_at).toLocaleString("ru-RU")}</div>
-                </div>
-              </div>
-            ))}
+        ) : (
+          <div className="profile-edit-card">
+            <input value={editFullName} onChange={(e) => setEditFullName(e.target.value)} placeholder="ФИО" />
+            <input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Телефон (+7XXXXXXXXXX)" />
+            <input value={editRegion} onChange={(e) => setEditRegion(e.target.value)} placeholder="Регион" />
+            <div className="profile-edit-buttons">
+              <button className="btn-primary" onClick={handleUpdateProfile}>Сохранить</button>
+              <button className="btn-secondary" onClick={() => setEditingProfile(false)}>Отмена</button>
+            </div>
           </div>
-          <button className="btn-small" onClick={() => setSelectedApp(null)}>Закрыть</button>
-        </div>
-      )}
-
-      {/* ПОДАТЬ ЗАЯВКУ */}
-      <h2>Подать заявку</h2>
-      <div className="apply-form">
-        {applyMsg && <div className="success-msg">{applyMsg}</div>}
-        <select value={applyProgram} onChange={(e) => setApplyProgram(Number(e.target.value))}>
-          <option value={0}>Выберите программу</option>
-          {programs.map((p) => (
-            <option key={p.id} value={p.id}>{p.name} ({p.faculty})</option>
-          ))}
-        </select>
-        <input type="number" placeholder="Сумма баллов ЕГЭ" value={applyScore} onChange={(e) => setApplyScore(e.target.value)} />
-        <select value={applyWave} onChange={(e) => setApplyWave(Number(e.target.value))}>
-          <option value={1}>1 волна</option>
-          <option value={2}>2 волна</option>
-        </select>
-        <select value={applySource} onChange={(e) => setApplySource(e.target.value)}>
-          <option value="site">Сайт</option>
-          <option value="olymp">Олимпиада</option>
-          <option value="aggregator">Агрегатор</option>
-          <option value="other">Другое</option>
-        </select>
-        <button className="btn-primary" onClick={handleApply} disabled={!applyProgram || !applyScore}>
-          Отправить заявку
-        </button>
+        )}
       </div>
+
+      {/* Мои заявки - карточки */}
+      <h2>📄 Мои заявки ({myApps.length})</h2>
+      {myApps.length === 0 ? (
+        <p className="empty-state">У вас пока нет заявок. Нажмите «Подать заявку»</p>
+      ) : (
+        <div className="cards-grid">
+          {myApps.map((a) => (
+            <div key={a.id} className={`application-card ${animateStatus === a.id ? "card-animate" : ""}`}>
+              <div className="card-header" style={{ borderLeftColor: getStatusColor(a.status) }}>
+                <h3>{programName(a.program_id)}</h3>
+                <span className="badge" style={{ backgroundColor: getStatusColor(a.status) }}>
+                  {getStatusText(a.status)}
+                </span>
+              </div>
+              
+              {/* Прогресс-бар статуса */}
+              <div className="progress-steps">
+                {["new", "review", "enrolled", "rejected"].map((step, idx) => (
+                  <div key={step} className={`step ${getStatusStep(a.status) >= idx ? "active" : ""} ${a.status === "rejected" && step === "rejected" ? "rejected" : ""}`}>
+                    <div className="step-dot"></div>
+                    <div className="step-label">{step === "new" ? "Новая" : step === "review" ? "Рассмотрение" : step === "enrolled" ? "Зачисление" : "Отказ"}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="card-details">
+                <div><strong>Баллы ЕГЭ:</strong> {a.score || "—"}</div>
+                <div><strong>Волна:</strong> {a.wave}</div>
+                <div><strong>Дата:</strong> {new Date(a.created_at).toLocaleDateString("ru-RU")}</div>
+              </div>
+
+              <div className="card-buttons">
+                <button className="btn-detail" onClick={() => loadAppDetail(a.id)}>Подробнее</button>
+                {a.status !== "enrolled" && a.status !== "rejected" && (
+                  <button className="btn-cancel" onClick={() => handleCancelApplication(a.id)}>Отозвать</button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Детали заявки */}
+      {selectedApp && (
+        <div className="modal-overlay" onClick={() => setSelectedApp(null)}>
+          <div className="modal-content detail-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>📌 Заявка: {selectedApp.program}</h3>
+            <p><strong>Факультет:</strong> {selectedApp.faculty}</p>
+            <p><strong>Статус:</strong> <span className="badge" style={{ backgroundColor: getStatusColor(selectedApp.status) }}>{getStatusText(selectedApp.status)}</span></p>
+            <p><strong>Баллы:</strong> {selectedApp.score}</p>
+            <p><strong>Волна:</strong> {selectedApp.wave}</p>
+            <p><strong>Источник:</strong> {selectedApp.source}</p>
+            <h4>История изменений:</h4>
+            <div className="history-list">
+              {selectedApp.history?.map((h: any, i: number) => (
+                <div key={i} className="history-item">
+                  <span className="history-status">{h.old_status || "—"} → {h.new_status}</span>
+                  <span className="history-date">{new Date(h.changed_at).toLocaleString("ru-RU")}</span>
+                </div>
+              ))}
+            </div>
+            <button className="btn-close" onClick={() => setSelectedApp(null)}>Закрыть</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
