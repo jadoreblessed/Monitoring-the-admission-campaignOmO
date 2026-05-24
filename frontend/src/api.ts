@@ -46,3 +46,5 @@ export const cancelApplication = (token: string, applicationId: number) =>
 
 export const fetchApplicationDetail = (token: string, applicationId: number) =>
   API.get(`/cabinet/application/${applicationId}`, { headers: { Authorization: `Bearer ${token}` } });
+export const fetchApplicants = () => API.get("/applicants/");
+export const fetchPrograms = () => API.get("/programs/");
