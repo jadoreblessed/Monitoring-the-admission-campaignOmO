@@ -1,3 +1,23 @@
+import {
+  Users,
+  UserCheck,
+  TrendingUp,
+  UserX
+} from "lucide-react";
+
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
+} from "recharts";
 import { useEffect, useState } from "react";
 import { fetchMetrics, fetchByProgram, fetchApplications, fetchByDate, fetchBySource, exportCSV } from "./api";
 import Cabinet from "./Cabinet";
@@ -47,46 +67,19 @@ function MiniLineChart({ data }: { data: { date: string; count: number }[] }) {
   );
 }
 
-function DonutChart({ data }: { data: { source: string; count: number }[] }) {
-  const colors: Record<string, string> = { site: "#4f7ef8", olymp: "#22c55e", aggregator: "#f59e0b", other: "#a78bfa" };
-  const labels: Record<string, string> = { site: "Сайт", olymp: "Олимпиада", aggregator: "Агрегатор", other: "Другое" };
-  const total = data.reduce((s, d) => s + d.count, 0);
-  if (!total) return <div className="donut-empty">Нет данных</div>;
-  let cumAngle = -90;
-  const R = 50, r = 30, cx = 70, cy = 60;
-  const slices = data.filter(d => d.count > 0).map(d => {
-    const angle = (d.count / total) * 360;
-    const startAngle = cumAngle;
-    cumAngle += angle;
-    const toRad = (a: number) => (a * Math.PI) / 180;
-    const x1 = cx + R * Math.cos(toRad(startAngle));
-    const y1 = cy + R * Math.sin(toRad(startAngle));
-    const x2 = cx + R * Math.cos(toRad(cumAngle - 0.01));
-    const y2 = cy + R * Math.sin(toRad(cumAngle - 0.01));
-    const x3 = cx + r * Math.cos(toRad(cumAngle - 0.01));
-    const y3 = cy + r * Math.sin(toRad(cumAngle - 0.01));
-    const x4 = cx + r * Math.cos(toRad(startAngle));
-    const y4 = cy + r * Math.sin(toRad(startAngle));
-    const large = angle > 180 ? 1 : 0;
-    return { path: `M${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${large},0 ${x4},${y4} Z`, source: d.source, count: d.count };
-  });
+function SourcesPieChart({ data }: { data: { source: string; count: number }[] }) {
+  if (!data || data.length === 0) return <div className="donut-empty">Нет данных</div>;
+  const PIE_COLORS = ["#2563eb", "#22c55e", "#f59e0b", "#ef4444"];
   return (
-    <div className="donut-wrap">
-      <svg viewBox="0 0 140 120" className="donut-svg">
-        {slices.map(s => <path key={s.source} d={s.path} fill={colors[s.source]} opacity="0.9" />)}
-        <text x={cx} y={cy - 4} textAnchor="middle" fontSize="11" fontWeight="700" fill="#e8ecf4">{total}</text>
-        <text x={cx} y={cy + 8} textAnchor="middle" fontSize="7" fill="#7a849e">заявок</text>
-      </svg>
-      <div className="donut-legend">
-        {data.filter(d => d.count > 0).map(d => (
-          <div key={d.source} className="donut-item">
-            <span className="donut-dot" style={{ background: colors[d.source] }} />
-            <span className="donut-label">{labels[d.source]}</span>
-            <span className="donut-val">{d.count}</span>
-          </div>
-        ))}
-      </div>
-    </div>
+    <ResponsiveContainer width="100%" height={250}>
+      <PieChart>
+        <Pie data={data} dataKey="count" nameKey="source" cx="50%" cy="50%" innerRadius={60} outerRadius={80} label>
+          {data.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+        </Pie>
+        <Tooltip contentStyle={{ backgroundColor: '#13161e', borderColor: '#252a38', color: '#e8ecf4' }} />
+        <Legend formatter={(value) => sourceLabel[value] || value} />
+      </PieChart>
+    </ResponsiveContainer>
   );
 }
 
@@ -102,6 +95,7 @@ function App() {
   const [sourceData, setSourceData] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState("");
   const [waveFilter, setWaveFilter] = useState("");
+  const [sourceFilter, setSourceFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [page, setPage] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -130,10 +124,11 @@ function App() {
     });
   };
 
-  const handleFilters = (status: string, wave: string, date: string) => {
+  const handleFilters = (status: string, wave: string, date: string, source: string) => {
     const params: Record<string, string> = {};
     if (status) params.status = status;
     if (wave) params.wave = wave;
+    if (source) params.source = source;
     if (date) {
       const days = parseInt(date);
       const from = new Date();
@@ -143,10 +138,10 @@ function App() {
     loadApplications(params);
   };
 
-  const onStatusChange = (s: string) => { setStatusFilter(s); handleFilters(s, waveFilter, dateFilter); };
-  const onWaveChange  = (w: string) => { setWaveFilter(w);   handleFilters(statusFilter, w, dateFilter); };
-  const onDateChange  = (d: string) => { setDateFilter(d);   handleFilters(statusFilter, waveFilter, d); };
-
+  const onStatusChange = (s: string) => { setStatusFilter(s); handleFilters(s, waveFilter, dateFilter, sourceFilter); };
+  const onWaveChange   = (w: string) => { setWaveFilter(w);   handleFilters(statusFilter, w, dateFilter, sourceFilter); };
+  const onDateChange   = (d: string) => { setDateFilter(d);   handleFilters(statusFilter, waveFilter, d, sourceFilter); };
+  const onSourceChange = (s: string) => { setSourceFilter(s); handleFilters(statusFilter, waveFilter, dateFilter, s); };
   if (mode === "cabinet") return <Cabinet onBack={() => setMode("dashboard")} />;
 
   const convPct = metrics?.conversion_rate ?? 0;
@@ -155,59 +150,78 @@ function App() {
   const totalPages = Math.ceil(applications.length / PAGE_SIZE);
 
   return (
-    <div className="app">
-      <nav className="topbar">
-        <div className="topbar-left">
-          <div className="logo">МПК</div>
-          <div className="topbar-info">
-            <span className="topbar-title">Мониторинг Приёмной Кампании</span>
-            <span className="topbar-sub">РТУ МИРЭА · 2026</span>
+    <div className="app-wrapper">
+      {/* Боковое меню */}
+      <aside className="sidebar desktop-only">
+        <div className="sidebar-header">МПК РТУ МИРЭА</div>
+        <nav className="sidebar-nav">
+          <div className="sidebar-link active" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Дашборд</div>
+          <div className="sidebar-link" onClick={() => document.querySelector('.table-scroll')?.scrollIntoView({ behavior: 'smooth' })}>Заявки</div>
+          <div className="sidebar-link" onClick={() => document.querySelector('.prog-list')?.scrollIntoView({ behavior: 'smooth' })}>Программы</div>
+          <div className="sidebar-link" onClick={exportCSV}>Экспорт</div>
+        </nav>
+      </aside>
+
+      <div className="main-wrapper">
+        <nav className="topbar">
+          <div className="topbar-left">
+            <button className="btn-burger mobile-only" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+            <div className="topbar-info">
+              <span className="topbar-title">Мониторинг Приёмной Кампании</span>
+            </div>
           </div>
-        </div>
-        <button className="btn-lk desktop-only" onClick={() => setMode("cabinet")}>Личный кабинет</button>
-        <button className="btn-burger mobile-only" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
-      </nav>
+          {/* Кнопка ЛК */}
+          <button className="btn-lk desktop-only" onClick={() => setMode("cabinet")}>ЛК Абитуриента</button>
+        </nav>
 
-      {menuOpen && (
-        <div className="mobile-menu">
-          <button onClick={() => { setMode("cabinet"); setMenuOpen(false); }}>Личный кабинет</button>
-        </div>
-      )}
+        {menuOpen && (
+          <div className="mobile-menu">
+            <button onClick={() => { setMode("cabinet"); setMenuOpen(false); }}>ЛК Абитуриента</button>
+          </div>
+        )}
 
-      <main className="content">
+        <main className="content">
         <div className="page-header">
           <h2 className="content-title">Обзор кампании</h2>
         </div>
 
         {metrics && (
           <div className="top-row">
-            <div className="card card-ring">
-              <svg className="ring" viewBox="0 0 90 90">
-                <circle cx="45" cy="45" r="35" fill="none" stroke="#252a38" strokeWidth="7" />
-                <circle cx="45" cy="45" r="35" fill="none" stroke="#4f7ef8" strokeWidth="7"
-                  strokeDasharray={`${ringDash} 220`} strokeLinecap="round"
-                  transform="rotate(-90 45 45)" />
-              </svg>
-              <div className="ring-center">
-                <span className="ring-value">{convPct}%</span>
-                <span className="ring-label">Конверсия</span>
+            <div className="card">
+              <div className="card-ring">
+                <Users size={36} color="#2563eb" />
+                <div className="ring-center">
+                  <span className="card-num">{metrics?.total_applications || 0}</span>
+                  <span className="card-desc">Всего заявок</span>
+                </div>
               </div>
             </div>
             <div className="card">
-              <span className="card-num">{metrics.total_applications}</span>
-              <span className="card-desc">Всего заявок</span>
+              <div className="card-ring">
+                <UserCheck size={36} color="#22c55e" />
+                <div className="ring-center">
+                  <span className="card-num green">{metrics?.enrolled || 0}</span>
+                  <span className="card-desc">Зачислено</span>
+                </div>
+              </div>
             </div>
             <div className="card">
-              <span className="card-num green">{metrics.enrolled}</span>
-              <span className="card-desc">Зачислено</span>
+              <div className="card-ring">
+                <TrendingUp size={36} color="#f59e0b" />
+                <div className="ring-center">
+                  <span className="card-num orange">{metrics?.in_review || 0}</span>
+                  <span className="card-desc">На рассмотрении</span>
+                </div>
+              </div>
             </div>
             <div className="card">
-              <span className="card-num orange">{metrics.in_review}</span>
-              <span className="card-desc">На рассмотрении</span>
-            </div>
-            <div className="card">
-              <span className="card-num red">{metrics.rejected}</span>
-              <span className="card-desc">Отклонено</span>
+              <div className="card-ring">
+                <UserX size={36} color="#ef4444" />
+                <div className="ring-center">
+                  <span className="card-num red">{metrics?.rejected || 0}</span>
+                  <span className="card-desc">Отклонено</span>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -227,7 +241,7 @@ function App() {
               <span className="panel-title">По источникам</span>
             </div>
             <div className="chart-body">
-              <DonutChart data={sourceData} />
+              <SourcesPieChart data={sourceData} /><SourcesPieChart data={sourceData} />
             </div>
           </div>
           <div className="panel chart-panel">
@@ -279,9 +293,28 @@ function App() {
                   <span>{p.total} всего</span>
                 </div>
               </div>
+              
+                
             ))}
           </div>
         </div>
+        <div className="panel chart-panel" style={{ marginBottom: 16 }}>
+            <div className="panel-head-row">
+              <span className="panel-title">График конверсии</span>
+            </div>
+            <div className="chart-body">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={programs}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2e3447" vertical={false} />
+                  <XAxis dataKey="program_name" fontSize={11} angle={-20} textAnchor="end" height={80} stroke="#7a849e" interval={0} tick={{fill: '#7a849e'}} />
+                  <YAxis stroke="#7a849e" tick={{fill: '#7a849e'}} />
+                  <Tooltip contentStyle={{ backgroundColor: '#13161e', borderColor: '#252a38', color: '#e8ecf4', borderRadius: '8px' }} />
+                  <Bar dataKey="total" fill="#93c5fd" name="Заявок" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="enrolled" fill="#22c55e" name="Зачислено" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
         <div className="panel">
           <div className="panel-head-row">
@@ -354,9 +387,10 @@ function App() {
       </main>
 
       <footer className="foot">
-        <span>© 2026 РТУ МИРЭА — Мониторинг Приёмной Кампании</span>
-        <span>Зырянов В.А.</span>
-      </footer>
+          <span>© 2026 РТУ МИРЭА — Мониторинг Приёмной Кампании</span>
+          <span>Зырянов В.А.</span>
+        </footer>
+      </div>
     </div>
   );
 }
