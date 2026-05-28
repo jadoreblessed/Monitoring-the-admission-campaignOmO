@@ -11,8 +11,8 @@
   --text:      #e8ecf4;
   --text2:     #7a849e;
   --text3:     #464f66;
-  --accent:    #4f7ef8;
-  --accent-bg: rgba(79,126,248,0.1);
+  --accent:    #2563eb;
+  --accent-bg: rgba(37,99,235,0.1);
   --green:     #22c55e;
   --green-bg:  rgba(34,197,94,0.1);
   --red:       #ef4444;
@@ -1009,4 +1009,68 @@ h4 { font-size: 12px; color: var(--text2); margin: 12px 0 6px; font-weight: 500;
   font-size: 12px;
   font-weight: 600;
   color: white;
+}
+
+
+.app-wrapper { display: flex; min-height: 100vh; width: 100%; }
+.main-wrapper { flex: 1; display: flex; flex-direction: column; overflow-x: hidden; }
+
+.sidebar { width: 240px; background: var(--bg2); border-right: 1px solid var(--border); padding: 20px 0; }
+.sidebar-header { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; font-weight: 600; font-size: 16px; color: var(--text); }
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; }
+.sidebar-link { padding: 10px 16px; color: var(--text2); border-radius: var(--radius); cursor: pointer; transition: 0.2s; font-weight: 500;}
+.sidebar-link:hover, .sidebar-link.active { background: var(--accent-bg); color: var(--accent); }
+
+.card { transition: transform 0.2s, box-shadow 0.2s; }
+.card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); border-color: var(--border2); }
+
+select option { background-color: var(--bg2); color: #e8ecf4; }
+
+
+@keyframes skeleton-pulse {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.45; }
+  100% { opacity: 1; }
+}
+
+.skeleton {
+  display: block;
+  background: var(--border2);         
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+
+.skeleton-row td {
+  background: transparent !important;
+}
+
+
+.bar-chart-scroll {
+  width: 100%;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+.bar-chart-scroll::-webkit-scrollbar {
+  height: 5px;
+}
+.bar-chart-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.bar-chart-scroll::-webkit-scrollbar-thumb {
+  background: var(--border2);
+  border-radius: 3px;
+}
+.bar-chart-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text3);
+}
+
+.bar-chart-hint {
+  font-size: 11px;
+  color: var(--text3);
+  padding: 4px 4px 6px;
+  text-align: right;
+  white-space: nowrap;
 }
