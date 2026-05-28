@@ -1025,3 +1025,52 @@ h4 { font-size: 12px; color: var(--text2); margin: 12px 0 6px; font-weight: 500;
 .card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); border-color: var(--border2); }
 
 select option { background-color: var(--bg2); color: #e8ecf4; }
+
+
+@keyframes skeleton-pulse {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.45; }
+  100% { opacity: 1; }
+}
+
+.skeleton {
+  display: block;
+  background: var(--border2);         
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+
+.skeleton-row td {
+  background: transparent !important;
+}
+
+
+.bar-chart-scroll {
+  width: 100%;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+.bar-chart-scroll::-webkit-scrollbar {
+  height: 5px;
+}
+.bar-chart-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.bar-chart-scroll::-webkit-scrollbar-thumb {
+  background: var(--border2);
+  border-radius: 3px;
+}
+.bar-chart-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text3);
+}
+
+.bar-chart-hint {
+  font-size: 11px;
+  color: var(--text3);
+  padding: 4px 4px 6px;
+  text-align: right;
+  white-space: nowrap;
+}
