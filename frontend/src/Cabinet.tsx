@@ -1,61 +1,69 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-
-const API = axios.create({ baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:8000" });
+import API from "./api";
 
 interface CabinetProps {
   onBack: () => void;
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  new: "Новая",
+  review: "Рассмотрение",
+  enrolled: "Зачислен",
+  rejected: "Отклонён",
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  new: "#7aa4ff",
+  review: "#f59e0b",
+  enrolled: "#22c55e",
+  rejected: "#ef4444",
+};
+
+const SOURCE_LABELS: Record<string, string> = {
+  site: "Сайт",
+  olymp: "Олимпиада",
+  aggregator: "Агрегатор",
+  other: "Другое",
+};
+
 export default function Cabinet({ onBack }: CabinetProps) {
   const [page, setPage] = useState<"login" | "register" | "dashboard">("login");
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState(localStorage.getItem("mpk_token") || "");
   const [user, setUser] = useState<any>(null);
   const [myApps, setMyApps] = useState<any[]>([]);
   const [programs, setPrograms] = useState<any[]>([]);
   const [error, setError] = useState("");
-  const [showModal, setShowModal] = useState(false);
 
-  // форма входа
+  // Login
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPass, setLoginPass] = useState("");
 
-  // форма регистрации
+  // Register
   const [regName, setRegName] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [regPhone, setRegPhone] = useState("");
   const [regRegion, setRegRegion] = useState("");
   const [regPass, setRegPass] = useState("");
 
-  // форма подачи заявки
+  // Apply form
   const [applyProgram, setApplyProgram] = useState(0);
   const [applyScore, setApplyScore] = useState("");
   const [applyWave, setApplyWave] = useState(1);
   const [applySource, setApplySource] = useState("site");
+  const [applyHasOriginal, setApplyHasOriginal] = useState(0);
   const [applyMsg, setApplyMsg] = useState("");
+  const [showApplyForm, setShowApplyForm] = useState(false);
 
-  // детали заявки
+  // Detail
   const [selectedApp, setSelectedApp] = useState<any>(null);
-  const [animateStatus, setAnimateStatus] = useState<number | null>(null);
 
-  // редактирование профиля
+  // Edit profile
   const [editingProfile, setEditingProfile] = useState(false);
-  const [editFullName, setEditFullName] = useState("");
+  const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editRegion, setEditRegion] = useState("");
 
   const headers = { Authorization: `Bearer ${token}` };
-
-  // Получение первой буквы для аватарки
-  const getAvatarLetter = () => {
-    return user?.full_name?.charAt(0)?.toUpperCase() || "?";
-  };
-
-  // Статус заявки для прогресс-бара
-  const getStatusStep = (status: string) => {
-    const steps = ["new", "review", "enrolled", "rejected"];
-    return steps.indexOf(status);
-  };
 
   const loadData = async () => {
     try {
@@ -67,20 +75,43 @@ export default function Cabinet({ onBack }: CabinetProps) {
       setMyApps(appsRes.data);
       setPrograms(progsRes.data);
       setUser(profileRes.data);
-    } catch (err) {
+    } catch {
       setError("Ошибка загрузки данных");
     }
   };
 
   useEffect(() => {
+    if (token) {
+      setPage("dashboard");
+      loadData();
+    }
+  }, []);
+
+  useEffect(() => {
     if (page === "dashboard" && token) loadData();
   }, [page, token]);
+
+  const saveToken = (t: string) => {
+    setToken(t);
+    localStorage.setItem("mpk_token", t);
+  };
+
+  const handleLogout = () => {
+    setToken("");
+    localStorage.removeItem("mpk_token");
+    setPage("login");
+    setUser(null);
+    setMyApps([]);
+  };
 
   const handleLogin = async () => {
     setError("");
     try {
-      const res = await API.post("/cabinet/auth/login", { email: loginEmail, password: loginPass });
-      setToken(res.data.access_token);
+      const res = await API.post("/auth/login", {
+        email: loginEmail,
+        password: loginPass,
+      });
+      saveToken(res.data.access_token);
       setUser({ full_name: res.data.full_name, id: res.data.applicant_id });
       setPage("dashboard");
     } catch (e: any) {
@@ -91,14 +122,14 @@ export default function Cabinet({ onBack }: CabinetProps) {
   const handleRegister = async () => {
     setError("");
     try {
-      const res = await API.post("/cabinet/auth/register", {
+      const res = await API.post("/auth/register", {
         full_name: regName,
         email: regEmail,
         phone: regPhone || undefined,
         region: regRegion || undefined,
         password: regPass,
       });
-      setToken(res.data.access_token);
+      saveToken(res.data.access_token);
       setUser({ full_name: res.data.full_name, id: res.data.applicant_id });
       setPage("dashboard");
     } catch (e: any) {
@@ -117,55 +148,29 @@ export default function Cabinet({ onBack }: CabinetProps) {
           program_id: applyProgram,
           source: applySource,
           wave: applyWave,
-          score: parseFloat(applyScore),
+          score: applyScore ? parseFloat(applyScore) : undefined,
+          has_original: applyHasOriginal,
         },
         { headers }
       );
-      setApplyMsg("Заявка подана!");
-      setShowModal(false);
-      loadData();
+      setApplyMsg("Заявка успешно подана!");
+      setShowApplyForm(false);
       setApplyProgram(0);
       setApplyScore("");
+      loadData();
     } catch (e: any) {
       setError(e.response?.data?.detail || "Ошибка подачи заявки");
     }
   };
 
-  const handleCancelApplication = async (appId: number) => {
-    if (!confirm("Вы уверены, что хотите отменить заявку?")) return;
-    setError("");
+  const handleWithdraw = async (appId: number) => {
+    if (!confirm("Вы уверены, что хотите отозвать заявку?")) return;
     try {
-      await API.delete(`/cabinet/application/${appId}`, { headers });
-      setAnimateStatus(appId);
-      setTimeout(() => setAnimateStatus(null), 500);
-      loadData();
-      if (selectedApp?.id === appId) setSelectedApp(null);
+      await API.delete(`/cabinet/withdraw/${appId}`, { headers });
+      setMyApps(myApps.filter((a) => a.id !== appId));
     } catch (e: any) {
-      setError(e.response?.data?.detail || "Ошибка отмены заявки");
+      setError(e.response?.data?.detail || "Ошибка отзыва заявки");
     }
-  };
-
-  const handleUpdateProfile = async () => {
-    setError("");
-    try {
-      const updates: any = {};
-      if (editFullName && editFullName !== user?.full_name) updates.full_name = editFullName;
-      if (editPhone !== user?.phone) updates.phone = editPhone || null;
-      if (editRegion !== user?.region) updates.region = editRegion || null;
-      
-      await API.put("/cabinet/profile", updates, { headers });
-      await loadData();
-      setEditingProfile(false);
-    } catch (e: any) {
-      setError(e.response?.data?.detail || "Ошибка обновления профиля");
-    }
-  };
-
-  const startEditingProfile = () => {
-    setEditFullName(user?.full_name || "");
-    setEditPhone(user?.phone || "");
-    setEditRegion(user?.region || "");
-    setEditingProfile(true);
   };
 
   const loadAppDetail = async (appId: number) => {
@@ -177,220 +182,358 @@ export default function Cabinet({ onBack }: CabinetProps) {
     }
   };
 
-  const programName = (id: number) => programs.find((p) => p.id === id)?.name || `#${id}`;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "new": return "#ffc107";
-      case "review": return "#17a2b8";
-      case "enrolled": return "#28a745";
-      case "rejected": return "#dc3545";
-      default: return "#6c757d";
+  const handleSaveProfile = async () => {
+    try {
+      const res = await API.put(
+        "/cabinet/profile",
+        {
+          full_name: editName || undefined,
+          phone: editPhone || undefined,
+          region: editRegion || undefined,
+        },
+        { headers }
+      );
+      setUser(res.data);
+      setEditingProfile(false);
+    } catch (e: any) {
+      setError(e.response?.data?.detail || "Ошибка сохранения");
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "new": return "Новая";
-      case "review": return "На рассмотрении";
-      case "enrolled": return "Зачислен";
-      case "rejected": return "Отклонён";
-      default: return status;
-    }
-  };
+  const programName = (id: number) =>
+    programs.find((p: any) => p.id === id)?.name || `#${id}`;
 
-  // СТРАНИЦА ВХОДА
-  if (page === "login") {
+  // ---- AUTH PAGES ----
+  if (page === "login" || page === "register") {
     return (
-      <div className="cabinet-container">
-        <div className="cabinet-header">
-          <h1>🎓 Личный кабинет абитуриента</h1>
-          <button className="btn-back-large" onClick={onBack}>← Дашборд комиссии</button>
+      <div className="cab-auth-wrapper">
+        <div className="cab-auth-header">
+          <span className="cab-auth-logo">🎓 Личный кабинет абитуриента</span>
+          <button className="cab-btn-ghost" onClick={onBack}>
+            ← Дашборд комиссии
+          </button>
         </div>
-        <div className="auth-card">
-          <h2>Вход</h2>
-          {error && <div className="error-msg">{error}</div>}
-          <input type="email" placeholder="Email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
-          <input type="password" placeholder="Пароль" value={loginPass} onChange={(e) => setLoginPass(e.target.value)} />
-          <button className="btn-primary" onClick={handleLogin}>Войти</button>
-          <p className="auth-switch" onClick={() => { setPage("register"); setError(""); }}>
-            Нет аккаунта? Регистрация
-          </p>
+        <div className="cab-auth-divider" />
+        <div className="cab-auth-card">
+          <h2>{page === "login" ? "Вход" : "Регистрация"}</h2>
+          {error && <div className="cab-error">{error}</div>}
+
+          {page === "register" && (
+            <>
+              <input
+                placeholder="ФИО"
+                value={regName}
+                onChange={(e) => setRegName(e.target.value)}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={regEmail}
+                onChange={(e) => setRegEmail(e.target.value)}
+              />
+              <input
+                placeholder="Телефон (+7XXXXXXXXXX)"
+                value={regPhone}
+                onChange={(e) => setRegPhone(e.target.value)}
+              />
+              <input
+                placeholder="Регион"
+                value={regRegion}
+                onChange={(e) => setRegRegion(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Пароль (мин. 6 символов)"
+                value={regPass}
+                onChange={(e) => setRegPass(e.target.value)}
+              />
+              <button className="cab-btn-primary" onClick={handleRegister}>
+                Зарегистрироваться
+              </button>
+              <p className="cab-switch" onClick={() => { setPage("login"); setError(""); }}>
+                Уже есть аккаунт? Войти
+              </p>
+            </>
+          )}
+
+          {page === "login" && (
+            <>
+              <input
+                type="email"
+                placeholder="Email"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Пароль"
+                value={loginPass}
+                onChange={(e) => setLoginPass(e.target.value)}
+              />
+              <button className="cab-btn-primary" onClick={handleLogin}>
+                Войти
+              </button>
+              <p className="cab-switch" onClick={() => { setPage("register"); setError(""); }}>
+                Нет аккаунта? Регистрация
+              </p>
+            </>
+          )}
         </div>
       </div>
     );
   }
 
-  // СТРАНИЦА РЕГИСТРАЦИИ
-  if (page === "register") {
-    return (
-      <div className="cabinet-container">
-        <div className="cabinet-header">
-          <h1>🎓 Личный кабинет абитуриента</h1>
-          <button className="btn-back-large" onClick={onBack}>← Дашборд комиссии</button>
-        </div>
-        <div className="auth-card">
-          <h2>Регистрация</h2>
-          {error && <div className="error-msg">{error}</div>}
-          <input placeholder="ФИО" value={regName} onChange={(e) => setRegName(e.target.value)} />
-          <input type="email" placeholder="Email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} />
-          <input placeholder="Телефон (+7XXXXXXXXXX)" value={regPhone} onChange={(e) => setRegPhone(e.target.value)} />
-          <input placeholder="Регион" value={regRegion} onChange={(e) => setRegRegion(e.target.value)} />
-          <input type="password" placeholder="Пароль (мин. 6 символов)" value={regPass} onChange={(e) => setRegPass(e.target.value)} />
-          <button className="btn-primary" onClick={handleRegister}>Зарегистрироваться</button>
-          <p className="auth-switch" onClick={() => { setPage("login"); setError(""); }}>
-            Уже есть аккаунт? Войти
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ЛИЧНЫЙ КАБИНЕТ
+  // ---- DASHBOARD / CABINET ----
   return (
-    <div className="cabinet-container">
-      {/* Модальное окно подачи заявки */}
-      {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>📝 Подать заявку</h3>
-            <div className="modal-form">
-              <select value={applyProgram} onChange={(e) => setApplyProgram(Number(e.target.value))}>
-                <option value={0}>Выберите программу</option>
-                {programs.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name} ({p.faculty})</option>
-                ))}
-              </select>
-              <input type="number" placeholder="Сумма баллов ЕГЭ" value={applyScore} onChange={(e) => setApplyScore(e.target.value)} />
-              <select value={applyWave} onChange={(e) => setApplyWave(Number(e.target.value))}>
-                <option value={1}>1 волна</option>
-                <option value={2}>2 волна</option>
-              </select>
-              <select value={applySource} onChange={(e) => setApplySource(e.target.value)}>
-                <option value="site">Сайт</option>
-                <option value="olymp">Олимпиада</option>
-                <option value="aggregator">Агрегатор</option>
-                <option value="other">Другое</option>
-              </select>
-              <div className="modal-buttons">
-                <button className="btn-primary" onClick={handleApply} disabled={!applyProgram || !applyScore}>
-                  Отправить
+    <div className="cab-wrapper">
+      {/* Header */}
+      <div className="cab-header">
+        <div className="cab-header-left">
+          <div className="cab-avatar">{user?.full_name?.[0] || "?"}</div>
+          <div>
+            <div className="cab-greeting">Привет, {user?.full_name?.split(" ")[0] || ""}!</div>
+            <div className="cab-email">{user?.email}</div>
+          </div>
+        </div>
+        <div className="cab-header-right">
+          <button className="cab-btn-accent" onClick={() => setShowApplyForm(true)}>
+            + Подать заявку
+          </button>
+          <button className="cab-btn-outline" onClick={handleLogout}>
+            Выйти
+          </button>
+          <button className="cab-btn-ghost" onClick={onBack}>
+            ← Дашборд
+          </button>
+        </div>
+      </div>
+
+      <div className="cab-content">
+        {error && <div className="cab-error">{error}</div>}
+        {applyMsg && <div className="cab-success">{applyMsg}</div>}
+
+        {/* Profile */}
+        <section className="cab-section">
+          <h3 className="cab-section-title">📋 Мой профиль</h3>
+          <div className="cab-profile-card">
+            {!editingProfile ? (
+              <>
+                <div className="cab-profile-grid">
+                  <div>
+                    <span className="cab-label">ФИО:</span> {user?.full_name}
+                  </div>
+                  <div>
+                    <span className="cab-label">Телефон:</span> {user?.phone || "—"}
+                  </div>
+                  <div>
+                    <span className="cab-label">Регион:</span> {user?.region || "—"}
+                  </div>
+                </div>
+                <button
+                  className="cab-btn-outline"
+                  onClick={() => {
+                    setEditName(user?.full_name || "");
+                    setEditPhone(user?.phone || "");
+                    setEditRegion(user?.region || "");
+                    setEditingProfile(true);
+                  }}
+                >
+                  → Редактировать
                 </button>
-                <button className="btn-secondary" onClick={() => setShowModal(false)}>Отмена</button>
+              </>
+            ) : (
+              <div className="cab-edit-form">
+                <input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="ФИО" />
+                <input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Телефон" />
+                <input value={editRegion} onChange={(e) => setEditRegion(e.target.value)} placeholder="Регион" />
+                <div className="cab-edit-buttons">
+                  <button className="cab-btn-accent" onClick={handleSaveProfile}>Сохранить</button>
+                  <button className="cab-btn-outline" onClick={() => setEditingProfile(false)}>Отмена</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* My Applications */}
+        <section className="cab-section">
+          <h3 className="cab-section-title">📄 Мои заявки ({myApps.length})</h3>
+          <div className="cab-apps-grid">
+            {myApps.length === 0 ? (
+              <div className="cab-empty">У вас пока нет заявок</div>
+            ) : (
+              myApps.map((a) => (
+                <div className="cab-app-card" key={a.id}>
+                  <div className="cab-app-top">
+                    <span className="cab-app-program">{programName(a.program_id)}</span>
+                    <span
+                      className="cab-status-badge"
+                      style={{ background: STATUS_COLORS[a.status] + "22", color: STATUS_COLORS[a.status] }}
+                    >
+                      {STATUS_LABELS[a.status] || a.status}
+                    </span>
+                  </div>
+
+                  {/* Status timeline dots */}
+                  <div className="cab-timeline-dots">
+                    {["new", "review", "enrolled", "rejected"].map((s) => (
+                      <div key={s} className="cab-dot-group">
+                        <div
+                          className="cab-dot"
+                          style={{
+                            background:
+                              a.status === s || (s === "new" && true)
+                                ? STATUS_COLORS[s]
+                                : s === "review" && ["review", "enrolled"].includes(a.status)
+                                ? STATUS_COLORS[s]
+                                : s === "enrolled" && a.status === "enrolled"
+                                ? STATUS_COLORS[s]
+                                : s === "rejected" && a.status === "rejected"
+                                ? STATUS_COLORS[s]
+                                : "#333",
+                          }}
+                        />
+                        <span className="cab-dot-label">
+                          {s === "new" ? "Новая" : s === "review" ? "Рассмотрение" : s === "enrolled" ? "Зачисление" : "Отказ"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="cab-app-meta">
+                    <div>
+                      <strong>Баллы ЕГЭ:</strong> {a.score ?? "—"}
+                    </div>
+                    <div>
+                      <strong>Волна:</strong> {a.wave}
+                    </div>
+                    <div>
+                      <strong>Дата:</strong> {a.created_at ? new Date(a.created_at).toLocaleDateString("ru-RU") : "—"}
+                    </div>
+                  </div>
+
+                  <div className="cab-app-actions">
+                    <button className="cab-btn-small" onClick={() => loadAppDetail(a.id)}>
+                      Подробнее
+                    </button>
+                    {a.status === "new" && (
+                      <button className="cab-btn-small cab-btn-danger" onClick={() => handleWithdraw(a.id)}>
+                        Отозвать
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
+        {/* Detail modal */}
+        {selectedApp && (
+          <div className="cab-modal-overlay" onClick={() => setSelectedApp(null)}>
+            <div className="cab-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="cab-modal-header">
+                <h3>Заявка #{selectedApp.id}</h3>
+                <button className="cab-btn-ghost" onClick={() => setSelectedApp(null)}>✕</button>
+              </div>
+              <div className="cab-modal-body">
+                <p><strong>Программа:</strong> {selectedApp.program}</p>
+                <p><strong>Институт:</strong> {selectedApp.faculty}</p>
+                <p><strong>Статус:</strong> {STATUS_LABELS[selectedApp.status] || selectedApp.status}</p>
+                <p><strong>Баллы:</strong> {selectedApp.score}</p>
+                <p><strong>Волна:</strong> {selectedApp.wave}</p>
+                <p><strong>Источник:</strong> {SOURCE_LABELS[selectedApp.source] || selectedApp.source}</p>
+                <h4>История изменений</h4>
+                <div className="cab-history">
+                  {selectedApp.history?.map((h: any, i: number) => (
+                    <div key={i} className="cab-history-item">
+                      <div
+                        className="cab-history-dot"
+                        style={{ background: STATUS_COLORS[h.new_status] || "#666" }}
+                      />
+                      <div>
+                        <strong>{STATUS_LABELS[h.new_status] || h.new_status}</strong>
+                        {h.old_status && (
+                          <span className="cab-history-from"> ← {STATUS_LABELS[h.old_status] || h.old_status}</span>
+                        )}
+                        <div className="cab-history-date">
+                          {new Date(h.changed_at).toLocaleString("ru-RU")}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Шапка */}
-      <div className="cabinet-header">
-        <div className="header-left">
-          <div className="avatar">{getAvatarLetter()}</div>
-          <div>
-            <h1>Привет, {user?.full_name?.split(" ")[0]}!</h1>
-            <p className="user-email">{user?.email}</p>
-          </div>
-        </div>
-        <div className="header-right">
-          <button className="btn-apply" onClick={() => setShowModal(true)}>+ Подать заявку</button>
-          <button className="btn-logout" onClick={() => { setToken(""); setPage("login"); setUser(null); }}>
-            Выйти
-          </button>
-          <button className="btn-back" onClick={onBack}>← Дашборд</button>
-        </div>
-      </div>
+        {/* Apply form modal */}
+        {showApplyForm && (
+          <div className="cab-modal-overlay" onClick={() => setShowApplyForm(false)}>
+            <div className="cab-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="cab-modal-header">
+                <h3>Подать заявку</h3>
+                <button className="cab-btn-ghost" onClick={() => setShowApplyForm(false)}>✕</button>
+              </div>
+              <div className="cab-modal-body">
+                <label>Программа</label>
+                <select
+                  value={applyProgram}
+                  onChange={(e) => setApplyProgram(Number(e.target.value))}
+                >
+                  <option value={0}>Выберите программу</option>
+                  {programs.map((p: any) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.faculty})
+                    </option>
+                  ))}
+                </select>
 
-      {error && <div className="error-msg">{error}</div>}
+                <label>Баллы ЕГЭ</label>
+                <input
+                  type="number"
+                  placeholder="Напр: 285"
+                  value={applyScore}
+                  onChange={(e) => setApplyScore(e.target.value)}
+                />
 
-      {/* Профиль */}
-      <div className="profile-section">
-        <h2>📋 Мой профиль</h2>
-        {!editingProfile ? (
-          <div className="profile-card">
-            <div className="profile-row"><strong>ФИО:</strong> {user?.full_name}</div>
-            <div className="profile-row"><strong>Телефон:</strong> {user?.phone || "не указан"}</div>
-            <div className="profile-row"><strong>Регион:</strong> {user?.region || "не указан"}</div>
-            <button className="btn-edit" onClick={startEditingProfile}>✏ Редактировать</button>
-          </div>
-        ) : (
-          <div className="profile-edit-card">
-            <input value={editFullName} onChange={(e) => setEditFullName(e.target.value)} placeholder="ФИО" />
-            <input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Телефон (+7XXXXXXXXXX)" />
-            <input value={editRegion} onChange={(e) => setEditRegion(e.target.value)} placeholder="Регион" />
-            <div className="profile-edit-buttons">
-              <button className="btn-primary" onClick={handleUpdateProfile}>Сохранить</button>
-              <button className="btn-secondary" onClick={() => setEditingProfile(false)}>Отмена</button>
+                <label>Волна</label>
+                <select value={applyWave} onChange={(e) => setApplyWave(Number(e.target.value))}>
+                  <option value={1}>1 волна</option>
+                  <option value={2}>2 волна</option>
+                </select>
+
+                <label>Источник</label>
+                <select value={applySource} onChange={(e) => setApplySource(e.target.value)}>
+                  <option value="site">Сайт</option>
+                  <option value="olymp">Олимпиада</option>
+                  <option value="aggregator">Агрегатор</option>
+                  <option value="other">Другое</option>
+                </select>
+
+                <label className="cab-checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={applyHasOriginal === 1}
+                    onChange={(e) => setApplyHasOriginal(e.target.checked ? 1 : 0)}
+                  />
+                  Подаю оригиналы документов
+                </label>
+
+                <button
+                  className="cab-btn-accent"
+                  style={{ width: "100%", marginTop: 16 }}
+                  onClick={handleApply}
+                  disabled={!applyProgram}
+                >
+                  Отправить заявку
+                </button>
+              </div>
             </div>
           </div>
         )}
       </div>
-
-      {/* Мои заявки - карточки */}
-      <h2>📄 Мои заявки ({myApps.length})</h2>
-      {myApps.length === 0 ? (
-        <p className="empty-state">У вас пока нет заявок. Нажмите «Подать заявку»</p>
-      ) : (
-        <div className="cards-grid">
-          {myApps.map((a) => (
-            <div key={a.id} className={`application-card ${animateStatus === a.id ? "card-animate" : ""}`}>
-              <div className="card-header" style={{ borderLeftColor: getStatusColor(a.status) }}>
-                <h3>{programName(a.program_id)}</h3>
-                <span className="badge" style={{ backgroundColor: getStatusColor(a.status) }}>
-                  {getStatusText(a.status)}
-                </span>
-              </div>
-              
-              {/* Прогресс-бар статуса */}
-              <div className="progress-steps">
-                {["new", "review", "enrolled", "rejected"].map((step, idx) => (
-                  <div key={step} className={`step ${getStatusStep(a.status) >= idx ? "active" : ""} ${a.status === "rejected" && step === "rejected" ? "rejected" : ""}`}>
-                    <div className="step-dot"></div>
-                    <div className="step-label">{step === "new" ? "Новая" : step === "review" ? "Рассмотрение" : step === "enrolled" ? "Зачисление" : "Отказ"}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="card-details">
-                <div><strong>Баллы ЕГЭ:</strong> {a.score || "—"}</div>
-                <div><strong>Волна:</strong> {a.wave}</div>
-                <div><strong>Дата:</strong> {new Date(a.created_at).toLocaleDateString("ru-RU")}</div>
-              </div>
-
-              <div className="card-buttons">
-                <button className="btn-detail" onClick={() => loadAppDetail(a.id)}>Подробнее</button>
-                {a.status !== "enrolled" && a.status !== "rejected" && (
-                  <button className="btn-cancel" onClick={() => handleCancelApplication(a.id)}>Отозвать</button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Детали заявки */}
-      {selectedApp && (
-        <div className="modal-overlay" onClick={() => setSelectedApp(null)}>
-          <div className="modal-content detail-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>📌 Заявка: {selectedApp.program}</h3>
-            <p><strong>Факультет:</strong> {selectedApp.faculty}</p>
-            <p><strong>Статус:</strong> <span className="badge" style={{ backgroundColor: getStatusColor(selectedApp.status) }}>{getStatusText(selectedApp.status)}</span></p>
-            <p><strong>Баллы:</strong> {selectedApp.score}</p>
-            <p><strong>Волна:</strong> {selectedApp.wave}</p>
-            <p><strong>Источник:</strong> {selectedApp.source}</p>
-            <h4>История изменений:</h4>
-            <div className="history-list">
-              {selectedApp.history?.map((h: any, i: number) => (
-                <div key={i} className="history-item">
-                  <span className="history-status">{h.old_status || "—"} → {h.new_status}</span>
-                  <span className="history-date">{new Date(h.changed_at).toLocaleString("ru-RU")}</span>
-                </div>
-              ))}
-            </div>
-            <button className="btn-close" onClick={() => setSelectedApp(null)}>Закрыть</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

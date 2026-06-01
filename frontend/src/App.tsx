@@ -1,90 +1,87 @@
 import { useEffect, useState } from "react";
-import { fetchMetrics, fetchByProgram, fetchApplications, fetchByDate, fetchBySource } from "./api";
+import {
+  fetchMetrics,
+  fetchByProgram,
+  fetchApplications,
+  fetchByDate,
+  fetchBySource,
+  fetchPrograms,
+  exportCSV,
+} from "./api";
 import Cabinet from "./Cabinet";
 import "./App.css";
 
-const statusLabel: Record<string, string> = {
-  new: "Новая", review: "Рассмотрение", enrolled: "Зачислен", rejected: "Отклонён",
+/* ── helpers ── */
+const STATUS_MAP: Record<string, string> = {
+  new: "Новая",
+  review: "Рассмотрение",
+  enrolled: "Зачислен",
+  rejected: "Отклонён",
 };
-const sourceLabel: Record<string, string> = {
-  site: "Сайт", olymp: "Олимпиада", aggregator: "Агрегатор", other: "Другое",
+const STATUS_CLASS: Record<string, string> = {
+  new: "st-new",
+  review: "st-review",
+  enrolled: "st-enrolled",
+  rejected: "st-rejected",
+};
+const SOURCE_MAP: Record<string, string> = {
+  site: "Сайт",
+  olymp: "Олимпиада",
+  aggregator: "Агрегатор",
+  other: "Другое",
+};
+const SOURCE_COLORS: Record<string, string> = {
+  site: "#5b8def",
+  olymp: "#22c55e",
+  aggregator: "#f59e0b",
+  other: "#a78bfa",
 };
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://111.88.250.70:8000";
-
-function MiniLineChart({ data }: { data: { date: string; count: number }[] }) {
-  if (!data.length) return null;
-  const max = Math.max(...data.map(d => d.count), 1);
-  const W = 400, H = 130, pad = 12;
-  const points = data.map((d, i) => {
-    const x = pad + (i / (data.length - 1)) * (W - pad * 2);
-    const y = H - pad - 20 - ((d.count / max) * (H - pad * 2 - 20));
-    return `${x},${y}`;
-  }).join(" ");
-  const areaPoints = `${pad},${H - pad - 20} ` + points + ` ${W - pad},${H - pad - 20}`;
-  const labelIndices = data.reduce((acc: number[], _, i) => {
-    if (i % Math.ceil(data.length / 5) === 0 || i === data.length - 1) acc.push(i);
-    return acc;
-  }, []);
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="line-chart">
-      <defs>
-        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#4f7ef8" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#4f7ef8" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <polygon points={areaPoints} fill="url(#chartGrad)" />
-      <polyline points={points} fill="none" stroke="#4f7ef8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      {data.map((d, i) => {
-        const x = pad + (i / (data.length - 1)) * (W - pad * 2);
-        const y = H - pad - 20 - ((d.count / max) * (H - pad * 2 - 20));
-        return <circle key={i} cx={x} cy={y} r="2" fill="#4f7ef8" />;
-      })}
-      {labelIndices.map(i => {
-        const x = pad + (i / (data.length - 1)) * (W - pad * 2);
-        return <text key={i} x={x} y={H - 4} textAnchor="middle" fontSize="10" fill="#7a849e">{data[i].date}</text>;
-      })}
-    </svg>
-  );
-}
-
+/* ── Donut chart (pure SVG) ── */
 function DonutChart({ data }: { data: { source: string; count: number }[] }) {
-  const colors: Record<string, string> = { site: "#4f7ef8", olymp: "#22c55e", aggregator: "#f59e0b", other: "#a78bfa" };
-  const labels: Record<string, string> = { site: "Сайт", olymp: "Олимпиада", aggregator: "Агрегатор", other: "Другое" };
   const total = data.reduce((s, d) => s + d.count, 0);
-  if (!total) return <div className="donut-empty">Нет данных</div>;
-  let cumAngle = -90;
-  const R = 50, r = 30, cx = 70, cy = 60;
-  const slices = data.filter(d => d.count > 0).map(d => {
-    const angle = (d.count / total) * 360;
-    const startAngle = cumAngle;
-    cumAngle += angle;
-    const toRad = (a: number) => (a * Math.PI) / 180;
-    const x1 = cx + R * Math.cos(toRad(startAngle));
-    const y1 = cy + R * Math.sin(toRad(startAngle));
-    const x2 = cx + R * Math.cos(toRad(cumAngle - 0.01));
-    const y2 = cy + R * Math.sin(toRad(cumAngle - 0.01));
-    const x3 = cx + r * Math.cos(toRad(cumAngle - 0.01));
-    const y3 = cy + r * Math.sin(toRad(cumAngle - 0.01));
-    const x4 = cx + r * Math.cos(toRad(startAngle));
-    const y4 = cy + r * Math.sin(toRad(startAngle));
-    const large = angle > 180 ? 1 : 0;
-    return { path: `M${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${large},0 ${x4},${y4} Z`, source: d.source, count: d.count };
-  });
+  if (!total) return null;
+  const cx = 90, cy = 90, r = 70, sw = 28;
+  let offset = 0;
+  const circumference = 2 * Math.PI * r;
+
   return (
     <div className="donut-wrap">
-      <svg viewBox="0 0 140 120" className="donut-svg">
-        {slices.map(s => <path key={s.source} d={s.path} fill={colors[s.source]} opacity="0.9" />)}
-        <text x={cx} y={cy - 4} textAnchor="middle" fontSize="11" fontWeight="700" fill="#e8ecf4">{total}</text>
-        <text x={cx} y={cy + 8} textAnchor="middle" fontSize="7" fill="#7a849e">заявок</text>
+      <svg width={180} height={180} viewBox="0 0 180 180">
+        {data.map((d) => {
+          const pct = d.count / total;
+          const dash = pct * circumference;
+          const gap = circumference - dash;
+          const rot = offset * 360 - 90;
+          offset += pct;
+          return (
+            <circle
+              key={d.source}
+              cx={cx}
+              cy={cy}
+              r={r}
+              fill="none"
+              stroke={SOURCE_COLORS[d.source] || "#666"}
+              strokeWidth={sw}
+              strokeDasharray={`${dash} ${gap}`}
+              transform={`rotate(${rot} ${cx} ${cy})`}
+              style={{ transition: "stroke-dasharray 0.6s ease" }}
+            />
+          );
+        })}
+        <text x={cx} y={cy - 6} textAnchor="middle" fill="#fff" fontSize="28" fontWeight="800">
+          {total}
+        </text>
+        <text x={cx} y={cy + 14} textAnchor="middle" fill="#8d97a8" fontSize="11">
+          заявок
+        </text>
       </svg>
       <div className="donut-legend">
-        {data.filter(d => d.count > 0).map(d => (
-          <div key={d.source} className="donut-item">
-            <span className="donut-dot" style={{ background: colors[d.source] }} />
-            <span className="donut-label">{labels[d.source]}</span>
-            <span className="donut-val">{d.count}</span>
+        {data.map((d) => (
+          <div key={d.source} className="legend-row">
+            <span className="legend-dot" style={{ background: SOURCE_COLORS[d.source] }} />
+            <span className="legend-label">{SOURCE_MAP[d.source] || d.source}</span>
+            <strong className="legend-val">{d.count}</strong>
           </div>
         ))}
       </div>
@@ -92,295 +89,357 @@ function DonutChart({ data }: { data: { source: string; count: number }[] }) {
   );
 }
 
-const PAGE_SIZE = 20;
+/* ── Sparkline (SVG) ── */
+function Sparkline({ data }: { data: { date: string; count: number }[] }) {
+  if (!data.length) return <div className="sparkline-empty">Нет данных за период</div>;
+  const maxVal = Math.max(...data.map((d) => d.count), 1);
+  const w = 500, h = 120, pad = 20;
+  const step = (w - 2 * pad) / Math.max(data.length - 1, 1);
 
-function App() {
-  const [mode, setMode] = useState<"dashboard" | "cabinet">("dashboard");
-  const [metrics, setMetrics] = useState<any>(null);
-  const [programs, setPrograms] = useState<any[]>([]);
-  const [applications, setApplications] = useState<any[]>([]);
-  const [totalApplications, setTotalApplications] = useState(0);
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [sourceData, setSourceData] = useState<any[]>([]);
-  const [statusFilter, setStatusFilter] = useState("");
-  const [waveFilter, setWaveFilter] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
-  const [page, setPage] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
+  const points = data.map((d, i) => ({
+    x: pad + i * step,
+    y: h - pad - ((d.count / maxVal) * (h - 2 * pad)),
+  }));
+  const line = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+  const area = `${line} L${points[points.length - 1].x},${h - pad} L${points[0].x},${h - pad} Z`;
 
-  useEffect(() => {
-    if (mode !== "dashboard") return;
-
-    const load = () => {
-      fetchMetrics().then(r => setMetrics(r.data));
-      fetchByProgram().then(r => setPrograms(r.data));
-      fetchByDate(30).then(r => setChartData(r.data));
-      fetchBySource().then(r => setSourceData(r.data));
-      loadApplications({});
-    };
-
-    load();
-    const interval = setInterval(load, 30000);
-    return () => clearInterval(interval);
-  }, [mode]);
-
-  const loadApplications = (params: Record<string, string>) => {
-    setPage(0);
-    fetchApplications(params).then(r => {
-      const data = r.data;
-      if (data.items) {
-        setApplications(data.items);
-        setTotalApplications(data.total);
-      } else {
-        setApplications(data);
-        setTotalApplications(data.length);
-      }
-    });
-  };
-
-  const handleFilters = (status: string, wave: string, date: string) => {
-    const params: Record<string, string> = {};
-    if (status) params.status = status;
-    if (wave) params.wave = wave;
-    if (date) {
-      const days = parseInt(date);
-      const from = new Date();
-      from.setDate(from.getDate() - days);
-      params.created_after = from.toISOString().split("T")[0];
-    }
-    loadApplications(params);
-  };
-
-  const onStatusChange = (s: string) => { setStatusFilter(s); handleFilters(s, waveFilter, dateFilter); };
-  const onWaveChange  = (w: string) => { setWaveFilter(w);   handleFilters(statusFilter, w, dateFilter); };
-  const onDateChange  = (d: string) => { setDateFilter(d);   handleFilters(statusFilter, waveFilter, d); };
-
-  if (mode === "cabinet") return <Cabinet onBack={() => setMode("dashboard")} />;
-
-  const convPct = metrics?.conversion_rate ?? 0;
-  const ringDash = (convPct / 100) * 220;
-  const paged = applications.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-  const totalPages = Math.ceil(applications.length / PAGE_SIZE);
+  // date labels
+  const labelIdxs = data.length <= 6
+    ? data.map((_, i) => i)
+    : [0, Math.floor(data.length / 4), Math.floor(data.length / 2), Math.floor((3 * data.length) / 4), data.length - 1];
 
   return (
-    <div className="app">
-      <nav className="topbar">
-        <div className="topbar-left">
-          <div className="logo">МПК</div>
-          <div className="topbar-info">
-            <span className="topbar-title">Мониторинг Приёмной Кампании</span>
-            <span className="topbar-sub">РТУ МИРЭА · 2026</span>
-          </div>
-        </div>
-        <button className="btn-lk desktop-only" onClick={() => setMode("cabinet")}>Личный кабинет</button>
-        <button className="btn-burger mobile-only" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
-      </nav>
-
-      {menuOpen && (
-        <div className="mobile-menu">
-          <button onClick={() => { setMode("cabinet"); setMenuOpen(false); }}>Личный кабинет</button>
-        </div>
-      )}
-
-      <main className="content">
-        <div className="page-header">
-          <h2 className="content-title">Обзор кампании</h2>
-        </div>
-
-        {metrics && (
-          <div className="top-row">
-            <div className="card card-ring">
-              <svg className="ring" viewBox="0 0 90 90">
-                <circle cx="45" cy="45" r="35" fill="none" stroke="#252a38" strokeWidth="7" />
-                <circle cx="45" cy="45" r="35" fill="none" stroke="#4f7ef8" strokeWidth="7"
-                  strokeDasharray={`${ringDash} 220`} strokeLinecap="round"
-                  transform="rotate(-90 45 45)" />
-              </svg>
-              <div className="ring-center">
-                <span className="ring-value">{convPct}%</span>
-                <span className="ring-label">Конверсия</span>
-              </div>
-            </div>
-            <div className="card">
-              <span className="card-num">{metrics.total_applications}</span>
-              <span className="card-desc">Всего заявок</span>
-            </div>
-            <div className="card">
-              <span className="card-num green">{metrics.enrolled}</span>
-              <span className="card-desc">Зачислено</span>
-            </div>
-            <div className="card">
-              <span className="card-num orange">{metrics.in_review}</span>
-              <span className="card-desc">На рассмотрении</span>
-            </div>
-            <div className="card">
-              <span className="card-num red">{metrics.rejected}</span>
-              <span className="card-desc">Отклонено</span>
-            </div>
-          </div>
-        )}
-
-        <div className="charts-row">
-          <div className="panel chart-panel">
-            <div className="panel-head-row">
-              <span className="panel-title">Динамика заявок</span>
-              <span className="panel-hint">за 30 дней</span>
-            </div>
-            <div className="chart-body">
-              <MiniLineChart data={chartData} />
-            </div>
-          </div>
-          <div className="panel chart-panel">
-            <div className="panel-head-row">
-              <span className="panel-title">По источникам</span>
-            </div>
-            <div className="chart-body">
-              <DonutChart data={sourceData} />
-            </div>
-          </div>
-          <div className="panel chart-panel">
-            <div className="panel-head-row">
-              <span className="panel-title">Статусы</span>
-            </div>
-            {metrics && (
-              <div className="status-bars">
-                {[
-                  { key: "new",      label: "Новые",        val: metrics.new,       cls: "blue"   },
-                  { key: "review",   label: "Рассмотрение", val: metrics.in_review, cls: "orange" },
-                  { key: "enrolled", label: "Зачислены",    val: metrics.enrolled,  cls: "green"  },
-                  { key: "rejected", label: "Отклонены",    val: metrics.rejected,  cls: "red"    },
-                ].map(({ key, label, val, cls }) => (
-                  <div className="sbar" key={key}>
-                    <div className="sbar-head">
-                      <span className={`sbar-dot ${cls}`} />
-                      <span>{label}</span>
-                      <span className="sbar-val">{val}</span>
-                    </div>
-                    <div className="sbar-bg">
-                      <div className={`sbar-fill ${cls}-bg`}
-                        style={{ width: metrics.total_applications ? `${(val / metrics.total_applications) * 100}%` : "0%" }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="panel" style={{ marginBottom: 12 }}>
-          <div className="panel-head-row">
-            <span className="panel-title">Конверсия по программам</span>
-          </div>
-          <div className="prog-list">
-            {programs.map(p => (
-              <div className="prog" key={p.program_id}>
-                <div className="prog-top">
-                  <span className="prog-name">{p.program_name}</span>
-                  <span className="prog-pct">{p.conversion_rate}%</span>
-                </div>
-                <div className="prog-faculty">{p.faculty}</div>
-                <div className="prog-bar-bg">
-                  <div className="prog-bar-fill" style={{ width: `${Math.min(p.conversion_rate, 100)}%` }} />
-                </div>
-                <div className="prog-nums">
-                  <span>{p.enrolled} зачислено</span>
-                  <span>{p.total} всего</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="panel">
-          <div className="panel-head-row">
-            <span className="panel-title">
-              Заявки
-              <span className="count-badge">{totalApplications}</span>
-            </span>
-            <div className="panel-controls">
-              <select value={statusFilter} onChange={e => onStatusChange(e.target.value)}>
-                <option value="">Все статусы</option>
-                <option value="new">Новые</option>
-                <option value="review">На рассмотрении</option>
-                <option value="enrolled">Зачислены</option>
-                <option value="rejected">Отклонены</option>
-              </select>
-              <select value={waveFilter} onChange={e => onWaveChange(e.target.value)}>
-                <option value="">Все волны</option>
-                <option value="1">Волна 1</option>
-                <option value="2">Волна 2</option>
-              </select>
-              <select value={dateFilter} onChange={e => onDateChange(e.target.value)}>
-                <option value="">Любая дата</option>
-                <option value="7">За 7 дней</option>
-                <option value="30">За 30 дней</option>
-                <option value="60">За 60 дней</option>
-              </select>
-              <div style={{ position: "relative" }}>
-                <button className="btn-export" onClick={() => setExportOpen(!exportOpen)}>
-                  Экспорт ▾
-                </button>
-                {exportOpen && (
-                  <div className="export-dropdown" onMouseLeave={() => setExportOpen(false)}>
-                    <div onClick={() => { window.location.href = `${API_URL}/export/raw`; setExportOpen(false); }}>
-                      Заявки .xlsx
-                    </div>
-                    <div onClick={() => { window.location.href = `${API_URL}/export/report`; setExportOpen(false); }}>
-                      Отчёт .xlsx
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Абитуриент</th>
-                  <th>Программа</th>
-                  <th>Статус</th>
-                  <th>Баллы</th>
-                  <th>Волна</th>
-                  <th>Источник</th>
-                  <th>Дата</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paged.map(a => (
-                  <tr key={a.id}>
-                    <td className="td-mono">{a.id}</td>
-                    <td>{a.applicant_name ?? a.applicant_id}</td>
-                    <td>{a.program_name ?? a.program_id}</td>
-                    <td><span className={`tag tag-${a.status}`}>{statusLabel[a.status] || a.status}</span></td>
-                    <td className="td-mono">{a.score}</td>
-                    <td className="td-mono">{a.wave}</td>
-                    <td className="td-muted">{sourceLabel[a.source] || a.source}</td>
-                    <td className="td-mono td-muted">
-                      {a.created_at ? new Date(a.created_at).toLocaleDateString("ru-RU") : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button className="btn-page" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>←</button>
-              <span className="page-info">{page + 1} / {totalPages}</span>
-              <button className="btn-page" onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page === totalPages - 1}>→</button>
-            </div>
-          )}
-        </div>
-      </main>
-
-      <footer className="foot">
-        <span>© 2026 РТУ МИРЭА — Мониторинг Приёмной Кампании</span>
-      </footer>
-    </div>
+    <svg viewBox={`0 0 ${w} ${h + 20}`} className="sparkline-svg">
+      <defs>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#5b8def" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#5b8def" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={area} fill="url(#areaGrad)" />
+      <path d={line} fill="none" stroke="#5b8def" strokeWidth="2" />
+      {points.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r="3" fill="#5b8def" />
+      ))}
+      {labelIdxs.map((idx) => (
+        <text key={idx} x={points[idx].x} y={h + 12} textAnchor="middle" fill="#6b7280" fontSize="10">
+          {data[idx].date.slice(5).replace("-", ".")}
+        </text>
+      ))}
+    </svg>
   );
 }
 
-export default App;
+/* ── Sidebar ── */
+function Sidebar({ mode, onSetMode }: { mode: string; onSetMode: (m: any) => void }) {
+  return (
+    <aside className="sidebar">
+      <div className="sidebar-top">
+        <div className="brand">
+          <div className="logo-box">МПК</div>
+        </div>
+      </div>
+      <nav className="nav">
+        <button className={`nav-item ${mode === "dashboard" ? "active" : ""}`} onClick={() => onSetMode("dashboard")} title="Обзор">
+          <span className="icon">🏠</span>
+        </button>
+        <button className={`nav-item ${mode === "applications" ? "active" : ""}`} onClick={() => onSetMode("applications")} title="Заявки">
+          <span className="icon">📄</span>
+        </button>
+        <button className={`nav-item ${mode === "programs" ? "active" : ""}`} onClick={() => onSetMode("programs")} title="Программы">
+          <span className="icon">📚</span>
+        </button>
+        <div className="nav-spacer" />
+        <button className={`nav-item ${mode === "cabinet" ? "active" : ""}`} onClick={() => onSetMode("cabinet")} title="Личный кабинет">
+          <span className="avatar">👤</span>
+        </button>
+      </nav>
+    </aside>
+  );
+}
+
+/* ── App ── */
+export default function App() {
+  const [mode, setMode] = useState<"dashboard" | "cabinet" | "applications" | "programs">("dashboard");
+
+  const [metrics, setMetrics] = useState<any>(null);
+  const [programs, setPrograms] = useState<any[]>([]);
+  const [apps, setApps] = useState<any[]>([]);
+  const [sourceData, setSourceData] = useState<any[]>([]);
+  const [dateData, setDateData] = useState<any[]>([]);
+  const [allPrograms, setAllPrograms] = useState<any[]>([]);
+
+  // Filters for applications table
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterWave, setFilterWave] = useState("");
+  const [filterSource, setFilterSource] = useState("");
+  const [appPage, setAppPage] = useState(0);
+  const APP_PER_PAGE = 15;
+
+  // Applicant names cache
+  const [applicantNames, setApplicantNames] = useState<Record<number, string>>({});
+
+  const loadAll = () => {
+    fetchMetrics().then((r) => setMetrics(r.data));
+    fetchByProgram().then((r) => setPrograms(r.data));
+    fetchBySource().then((r) => setSourceData(r.data));
+    fetchByDate(30).then((r) => setDateData(r.data));
+    fetchPrograms().then((r) => setAllPrograms(r.data));
+    loadApps();
+  };
+
+  const loadApps = () => {
+    const params: Record<string, string> = {};
+    if (filterStatus) params.status = filterStatus;
+    if (filterWave) params.wave = filterWave;
+    if (filterSource) params.source = filterSource;
+    fetchApplications(params).then((r) => {
+      setApps(r.data);
+      setAppPage(0);
+    });
+  };
+
+  useEffect(() => {
+    loadAll();
+  }, []);
+
+  useEffect(() => {
+    loadApps();
+  }, [filterStatus, filterWave, filterSource]);
+
+  // Load applicant names for visible apps
+  useEffect(() => {
+    if (!apps.length) return;
+    const ids = [...new Set(apps.map((a) => a.applicant_id))].filter((id) => !applicantNames[id]);
+    if (!ids.length) return;
+    import("./api").then(({ default: API }) => {
+      Promise.all(ids.map((id) => API.get(`/applicants/${id}`).catch(() => null))).then((results) => {
+        const names: Record<number, string> = { ...applicantNames };
+        results.forEach((r) => {
+          if (r?.data) names[r.data.id] = r.data.full_name;
+        });
+        setApplicantNames(names);
+      });
+    });
+  }, [apps]);
+
+  const programNameById = (id: number) => {
+    const p = allPrograms.find((p: any) => p.id === id);
+    return p ? p.name : `#${id}`;
+  };
+
+  const renderDashboard = () => (
+  <div className="dash-content">
+    {/* Title */}
+    <div className="dash-title-row">
+      <div>
+        <h1 className="dash-h1">Обзор кампании</h1>
+      </div>
+    </div>
+
+    {/* Top metrics */}
+    <div className="metrics-row">
+      <div className="metric-card metric-conv">
+        <div className="metric-ring">
+          <svg width="54" height="54" viewBox="0 0 54 54">
+            <circle cx="27" cy="27" r="22" fill="none" stroke="#1e2330" strokeWidth="5" />
+            <circle
+              cx="27" cy="27" r="22" fill="none" stroke="#5b8def" strokeWidth="5"
+              strokeDasharray={`${(metrics?.conversion_rate || 0) / 100 * 138} 138`}
+              transform="rotate(-90 27 27)"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
+        <div>
+          <div className="metric-val">{metrics?.conversion_rate ?? 0}%</div>
+          <div className="metric-label">Конверсия</div>
+        </div>
+      </div>
+      <div className="metric-card">
+        <div className="metric-val metric-white">{metrics?.total_applications ?? 0}</div>
+        <div className="metric-label">Всего заявок</div>
+      </div>
+      <div className="metric-card">
+        <div className="metric-val metric-green">{metrics?.enrolled ?? 0}</div>
+        <div className="metric-label">Зачислено</div>
+      </div>
+      <div className="metric-card">
+        <div className="metric-val metric-yellow">{metrics?.in_review ?? 0}</div>
+        <div className="metric-label">На рассмотрении</div>
+      </div>
+      <div className="metric-card">
+        <div className="metric-val metric-red">{metrics?.rejected ?? 0}</div>
+        <div className="metric-label">Отклонено</div>
+      </div>
+    </div>
+
+    {/* Charts row */}
+    <div className="charts-row">
+      <div className="chart-panel chart-spark">
+        <div className="panel-head-row">
+          <h3>Динамика заявок</h3>
+          <span className="panel-hint">за 30 дней</span>
+        </div>
+        <Sparkline data={dateData} />
+      </div>
+      <div className="chart-panel chart-donut">
+        <h3>По источникам</h3>
+        <DonutChart data={sourceData} />
+      </div>
+      <div className="chart-panel chart-statuses">
+        <h3>Статусы</h3>
+        <div className="status-list">
+          <div className="status-row">
+            <span className="s-dot" style={{ background: "#7aa4ff" }} />
+            <span>Новые</span>
+            <strong className="s-val" style={{ color: "#7aa4ff" }}>{metrics?.new ?? 0}</strong>
+          </div>
+          <div className="status-row">
+            <span className="s-dot" style={{ background: "#f59e0b" }} />
+            <span>Рассмотрение</span>
+            <strong className="s-val" style={{ color: "#f59e0b" }}>{metrics?.in_review ?? 0}</strong>
+          </div>
+          <div className="status-row">
+            <span className="s-dot" style={{ background: "#22c55e" }} />
+            <span>Зачислены</span>
+            <strong className="s-val" style={{ color: "#22c55e" }}>{metrics?.enrolled ?? 0}</strong>
+          </div>
+          <div className="status-row">
+            <span className="s-dot" style={{ background: "#ef4444" }} />
+            <span>Отклонены</span>
+            <strong className="s-val" style={{ color: "#ef4444" }}>{metrics?.rejected ?? 0}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+  const renderApplications = () => {
+    const visible = apps.slice(appPage * APP_PER_PAGE, (appPage + 1) * APP_PER_PAGE);
+    const totalPages = Math.ceil(apps.length / APP_PER_PAGE);
+    return (
+      <div className="dash-content">
+        <div className="panel-head-row" style={{ marginBottom: 16 }}>
+          <h2 style={{ margin: 0 }}>
+            Заявки <span className="badge-count">{apps.length}</span>
+          </h2>
+          <div className="filters-row">
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+              <option value="">Все статусы</option>
+              <option value="new">Новая</option>
+              <option value="review">Рассмотрение</option>
+              <option value="enrolled">Зачислен</option>
+              <option value="rejected">Отклонён</option>
+            </select>
+            <select value={filterWave} onChange={(e) => setFilterWave(e.target.value)}>
+              <option value="">Все волны</option>
+              <option value="1">1 волна</option>
+              <option value="2">2 волна</option>
+            </select>
+            <select value={filterSource} onChange={(e) => setFilterSource(e.target.value)}>
+              <option value="">Любой источник</option>
+              <option value="site">Сайт</option>
+              <option value="olymp">Олимпиада</option>
+              <option value="aggregator">Агрегатор</option>
+              <option value="other">Другое</option>
+            </select>
+            <button className="btn-export" onClick={exportCSV}>Экспорт ↓</button>
+          </div>
+        </div>
+        <div className="apps-table">
+          <div className="apps-thead">
+            <span>ID</span>
+            <span>АБИТУРИЕНТ</span>
+            <span>ПРОГРАММА</span>
+            <span>СТАТУС</span>
+            <span>БАЛЛЫ</span>
+            <span>ВОЛНА</span>
+            <span>ИСТОЧНИК</span>
+            <span>ДАТА</span>
+          </div>
+          {visible.map((a) => (
+            <div className="apps-trow" key={a.id}>
+              <span className="app-id">{a.id}</span>
+              <span>{applicantNames[a.applicant_id] || `#${a.applicant_id}`}</span>
+              <span className="app-prog">{programNameById(a.program_id)}</span>
+              <span>
+                <span className={`status-chip ${STATUS_CLASS[a.status]}`}>
+                  {STATUS_MAP[a.status] || a.status}
+                </span>
+              </span>
+              <span>{a.score ?? "—"}</span>
+              <span>{a.wave}</span>
+              <span>{SOURCE_MAP[a.source] || a.source}</span>
+              <span>{a.created_at ? new Date(a.created_at).toLocaleDateString("ru-RU") : "—"}</span>
+            </div>
+          ))}
+        </div>
+        {totalPages > 1 && (
+          <div className="pagination">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button key={i} className={`page-btn ${appPage === i ? "active" : ""}`} onClick={() => setAppPage(i)}>
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderPrograms = () => (
+    <div className="dash-content">
+      <h2>Конверсия по <span style={{ color: "var(--accent)" }}>программам</span></h2>
+      <div className="programs-panel" style={{ marginTop: 16 }}>
+        {programs.length > 0
+          ? programs.map((p) => {
+              const pct = p.conversion_rate || 0;
+              return (
+                <div key={p.program_id} className="prog-row-detailed">
+                  <div className="prog-header">
+                    <span className="prog-title">{p.program_name}</span>
+                    <span className="prog-percent" style={{ color: pct > 0 ? "#5b8def" : "#ef4444" }}>{pct}%</span>
+                  </div>
+                  <div className="prog-insitute">{p.faculty}</div>
+                  <div className="prog-progress-bg">
+                    <div className="prog-progress-fill" style={{ width: `${Math.min(pct, 100)}%` }} />
+                  </div>
+                  <div className="prog-footer">
+                    <span>{p.enrolled || 0} зачислено</span>
+                    <span>{p.total || 0} всего</span>
+                  </div>
+                </div>
+              );
+            })
+          : <div style={{ padding: 40, textAlign: "center", color: "#6b7280" }}>Загрузка...</div>}
+      </div>
+    </div>
+  );
+
+  const renderMainContent = () => {
+    if (mode === "cabinet") return <Cabinet onBack={() => setMode("dashboard")} />;
+    if (mode === "applications") return renderApplications();
+    if (mode === "programs") return renderPrograms();
+    return renderDashboard();
+  };
+
+  return (
+    <div className="glass-root">
+      <Sidebar mode={mode} onSetMode={setMode} />
+      <div className="main-wrapper">
+        <header className="glass-header">
+          <div className="header-brand">
+            <span className="header-title">Мониторинг Приёмной Кампании</span>
+            <span className="header-sub">РТУ МИРЭА · 2026</span>
+          </div>
+          <button className="btn-lk-glass" onClick={() => setMode("cabinet")}>
+            Личный кабинет
+          </button>
+        </header>
+        <main className="content-area">{renderMainContent()}</main>
+      </div>
+    </div>
+  );
+}
