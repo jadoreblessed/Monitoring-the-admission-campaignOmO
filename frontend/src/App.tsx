@@ -194,8 +194,8 @@ export default function App() {
     if (filterWave) params.wave = filterWave;
     if (filterSource) params.source = filterSource;
     fetchApplications(params).then((r) => {
-      setApps(r.data);
-      setAppPage(0);
+  setApps(r.data.items ?? r.data);
+  setAppPage(0);
     });
   };
 
