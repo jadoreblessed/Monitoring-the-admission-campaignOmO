@@ -194,8 +194,8 @@ export default function App() {
     if (filterWave) params.wave = filterWave;
     if (filterSource) params.source = filterSource;
     fetchApplications(params).then((r) => {
-  setApps(r.data.items ?? r.data);
-  setAppPage(0);
+      setApps(r.data.items ?? r.data);
+      setAppPage(0);
     });
   };
 
@@ -362,8 +362,8 @@ export default function App() {
           {visible.map((a) => (
             <div className="apps-trow" key={a.id}>
               <span className="app-id">{a.id}</span>
-              <span>{applicantNames[a.applicant_id] || `#${a.applicant_id}`}</span>
-              <span className="app-prog">{programNameById(a.program_id)}</span>
+              <span>{a.applicant_name || applicantNames[a.applicant_id] || `#${a.applicant_id}`}</span>
+              <span className="app-prog">{a.program_name || programNameById(a.program_id)}</span>
               <span>
                 <span className={`status-chip ${STATUS_CLASS[a.status]}`}>
                   {STATUS_MAP[a.status] || a.status}
