@@ -58,7 +58,7 @@ def get_applications(
         Application.source,
         Application.wave,
         Application.created_at,
-        Application.updated_at,
+        Application.status_changed_at,
     ).join(Applicant, Application.applicant_id == Applicant.id).join(Program, Application.program_id == Program.id)
 
     # Применяем фильтры (если переданы)
@@ -87,7 +87,7 @@ def get_applications(
             "source": row.source,
             "wave": row.wave,
             "created_at": row.created_at,
-            "updated_at": row.updated_at,
+            "updated_at": row.status_changed_at,
         }
         for row in rows
     ]
