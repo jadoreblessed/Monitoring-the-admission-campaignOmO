@@ -2,14 +2,14 @@
 
 | Версия | Статус | Дата создания | Дата обновления |
 |--------|--------|---------------|-----------------|
-| v1.2   | Beta   | 2026-03-13    | 2026-05-06      |
+| v1.3   | Beta   | 2026-03-13    | 2026-06-08      |
 
 ## Демонстрационный стенд
 
-Проект развёрнут на сервере и доступен онлайн:
+Проект развёрнут и доступен онлайн:
 
 - **Дашборд:** http://admission-campaign.mooo.com
-- **Swagger API:** http://111.88.250.70:8000/docs
+- **Swagger API:** https://monitoring-the-admission-campaignomo-production.up.railway.app/docs
 
 Для входа в личный кабинет абитуриента используйте email любого абитуриента из базы и пароль `password123`.
 
@@ -51,14 +51,12 @@
 
 ## Что реализовано
 
-- полноценное веб-приложение развёрнуто на Yandex Cloud, доступно по домену `admission-campaign.mooo.com`;
-- процессы управляются через pm2 — автоматический перезапуск при сбоях и после перезагрузки сервера;
-- nginx как reverse proxy — сайт открывается без порта в адресе;
+- полноценное веб-приложение развёрнуто на Railway, доступно по адресу `https://fortunate-growth-production-c357.up.railway.app`;
 - две роли: приёмная комиссия (дашборд) и абитуриент (личный кабинет);
 - авторизация через JWT-токены (24 часа), пароли хранятся в bcrypt-хеше;
 - секретный ключ и конфигурация вынесены в `.env`, не хранятся в коде;
 - CORS настроен на конкретный домен фронтенда;
-- 15 реальных программ РТУ МИРЭА, 100 синтетических абитуриентов, 156 заявок;
+- 15 реальных программ РТУ МИРЭА, 100 синтетических абитуриентов, 174 заявки;
 - REST API с CRUD, дашбордом, экспортом и Swagger-документацией (22 эндпоинта);
 - экспорт данных в `.xlsx` — открывается в Excel без проблем с кодировкой;
 - журнал смен статуса заявки (`status_logs`) — полная история изменений;
@@ -70,12 +68,12 @@
 
 | Слой | Технологии |
 |------|-----------|
-| Backend | Python 3.12, FastAPI, SQLAlchemy, Pydantic v2, PostgreSQL 16 |
-| Frontend | React 18, TypeScript, Vite, Axios |
+| Backend | Python 3.13, FastAPI, SQLAlchemy, Pydantic v2, PostgreSQL 16 |
+| Frontend | React 19, TypeScript, Vite, Axios |
 | Авторизация | JWT (python-jose), bcrypt (passlib) |
 | Тестирование | pytest, httpx, SQLite (in-memory) |
-| Инфраструктура | Yandex Cloud, Ubuntu 22.04, nginx, pm2 |
-| Инструменты | Git, Gitverse, VS Code, Swagger, pgAdmin |
+| Инфраструктура | Railway (PaaS), PostgreSQL (Railway) |
+| Инструменты | Git, Gitverse, GitHub, VS Code, Swagger |
 
 ## API эндпоинты
 
@@ -110,7 +108,7 @@
 ├── backend/
 │   ├── main.py                    # Точка входа FastAPI, CORS, роутеры
 │   ├── test_main.py               # 21 pytest-тест для dashboard и applications
-│   ├── .env                       # Конфигурация (не в репо)
+│   ├── requirements.txt           # Зависимости Python
 │   ├── app/
 │   │   ├── database.py            # Подключение к PostgreSQL
 │   │   ├── models.py              # 4 таблицы: applicants, programs, applications, status_logs
@@ -125,7 +123,6 @@
 │   │       ├── seed.py            # Генерация синтетических данных
 │   │       └── cabinet.py         # Регистрация, вход, личный кабинет
 ├── frontend/
-│   ├── .env                       # VITE_API_URL (не в репо)
 │   └── src/
 │       ├── App.tsx                # Дашборд комиссии
 │       ├── Cabinet.tsx            # Личный кабинет абитуриента
@@ -140,7 +137,7 @@
 │   ├── 04-design/                 # Event Storming, BPMN, ERD
 │   ├── 05-technical/              # Документация по ГОСТ
 │   └── 90-checkpoints/            # Индексы хакатонов CP1-CP3
-├── ecosystem.config.js            # Конфигурация pm2
+├── load_data.py                   # Загрузка данных из CSV
 ├── TASKS.md                       # Задачи для команды
 ├── FEATURE_LIST.md                # Фич-лист по спринтам
 └── README.md                      # Этот файл
@@ -164,57 +161,54 @@
 - Контрольная точка 3 (CP3): `2026-04-15`
 - Деплой на Yandex Cloud: `2026-04-18`
 - Домен + nginx + pm2: `2026-05-06`
-- Защита проекта: `2026-06` (ориентировочно)
+- Миграция на Railway: `2026-06-08`
+- Защита проекта: `2026-06-09`
 
 ## Локальный запуск (для разработки)
 
 ### Требования
 - Python 3.10+
-- Node.js 18+
+- Node.js 22+
 - PostgreSQL 14+
 
 ### 1. Клонировать репозиторий
 ```bash
 git clone https://gitverse.ru/jadoreblessed/Monitoring-the-admission-campaignOmO.git
 cd Monitoring-the-admission-campaignOmO
-cd backend
+```
 
-# Создать виртуальное окружение
+### 2. Запустить backend
+```bash
+cd backend
 python -m venv venv
 source venv/bin/activate      # Linux/macOS
 venv\Scripts\activate         # Windows
-
-# Установить зависимости
-pip install fastapi uvicorn psycopg2-binary sqlalchemy python-dotenv passlib[bcrypt] python-jose[cryptography] pandas openpyxl pytest
-
+pip install -r requirements.txt
 # Создать .env файл
-cat > .env << EOF
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/admission_db
-SECRET_KEY=admission-monitoring-secret-key-2026
-ALGORITHM=HS256
-EOF
-
-# Создать базу данных PostgreSQL
+echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/admission_db" > .env
+echo "SECRET_KEY=admission-monitoring-secret-key-2026" >> .env
+echo "ALGORITHM=HS256" >> .env
+# Создать базу данных
 psql -U postgres -c "CREATE DATABASE admission_db;"
-
-# Запустить сервер
 uvicorn main:app --reload --port 8000
-# Открыть новый терминал
+```
+
+### 3. Запустить frontend
+```bash
 cd frontend
-
-# Установить зависимости
 npm install
-
-# Создать .env файл
 echo "VITE_API_URL=http://localhost:8000" > .env
-
-# Запустить
 npm run dev
+```
+
+### 4. Загрузить тестовые данные
+```
+POST /seed/generate
+```
+
+### 5. Запустить тесты
+```bash
 cd backend
-source venv/bin/activate
-python -c "from app.routers import seed; seed.generate_synthetic_data()"
-cd backend
-source venv/bin/activate
 pytest test_main.py -v
 ```
 
