@@ -425,7 +425,7 @@ export default function App() {
     return renderDashboard();
   };
 
-  return (
+return (
     <div className="glass-root">
       <Sidebar mode={mode} onSetMode={setMode} />
       <div className="main-wrapper">
@@ -440,6 +440,24 @@ export default function App() {
         </header>
         <main className="content-area">{renderMainContent()}</main>
       </div>
+      <nav className="mobile-nav">
+        <button className={`mobile-nav-item ${mode === "dashboard" ? "active" : ""}`} onClick={() => setMode("dashboard")}>
+          <span className="icon">🏠</span>
+          <span>Обзор</span>
+        </button>
+        <button className={`mobile-nav-item ${mode === "applications" ? "active" : ""}`} onClick={() => setMode("applications")}>
+          <span className="icon">📄</span>
+          <span>Заявки</span>
+        </button>
+        <button className={`mobile-nav-item ${mode === "programs" ? "active" : ""}`} onClick={() => setMode("programs")}>
+          <span className="icon">📚</span>
+          <span>Программы</span>
+        </button>
+        <button className={`mobile-nav-item ${mode === "cabinet" ? "active" : ""}`} onClick={() => setMode("cabinet")}>
+          <span className="icon">👤</span>
+          <span>Кабинет</span>
+        </button>
+      </nav>
     </div>
   );
 }
